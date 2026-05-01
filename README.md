@@ -1,5 +1,6 @@
 # Crossword App
 
+[![Build and Push](https://github.com/slmingol/crossword-catastrophe/actions/workflows/build-and-push.yml/badge.svg)](https://github.com/slmingol/crossword-catastrophe/actions/workflows/build-and-push.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub stars](https://img.shields.io/github/stars/slmingol/crossword-catastrophe?style=social)](https://github.com/slmingol/crossword-catastrophe/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/slmingol/crossword-catastrophe)](https://github.com/slmingol/crossword-catastrophe/issues)
@@ -37,6 +38,26 @@ npm run docker:up
 # Access the app
 # Frontend: http://localhost:3000
 # Backend API: http://localhost:3001
+```
+
+## Using Pre-built Container Images
+
+Pre-built multi-platform (amd64/arm64) containers are available from GitHub Container Registry:
+
+```bash
+# Pull the latest images
+docker pull ghcr.io/slmingol/crossword-catastrophe-backend:latest
+docker pull ghcr.io/slmingol/crossword-catastrophe-frontend:latest
+docker pull ghcr.io/slmingol/crossword-catastrophe-scraper:latest
+
+# Or use in your docker-compose.yml
+# services:
+#   backend:
+#     image: ghcr.io/slmingol/crossword-catastrophe-backend:latest
+#   frontend:
+#     image: ghcr.io/slmingol/crossword-catastrophe-frontend:latest
+#   scraper:
+#     image: ghcr.io/slmingol/crossword-catastrophe-scraper:latest
 ```
 
 ## Development

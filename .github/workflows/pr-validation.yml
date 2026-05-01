@@ -1,0 +1,129 @@
+name: Pull Request Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  validate-backend:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build backend
+        run: npm run build --workspace=backend
+
+      - name: Check TypeScript
+        run: npx tsc --noEmit --project packages/backend/tsconfig.json
+
+  validate-frontend:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build --workspace=frontend
+
+      - name: Check TypeScript
+        run: npx tsc --noEmit --project packages/frontend/tsconfig.json
+
+  validate-scraper:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build scraper
+        run: npm run build --workspace=scraper
+
+      - name: Check TypeScript
+        run: npx tsc --noEmit --project packages/scraper/tsconfig.json
+
+  docker-build-test:
+    runs-on: ubuntu-latest
+    needs: [validate-backend, validate-frontend, validate-scraper]
+    strategy:
+      matrix:
+        service: [backend, frontend, scraper]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image for ${{ matrix.service }}
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./packages/${{ matrix.service }}/Dockerfile
+          push: false
+          tags: crossword-${{ matrix.service }}:pr-${{ github.event.pull_request.number }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  pr-summary:
+    runs-on: ubuntu-latest
+    needs: [validate-backend, validate-frontend, validate-scraper, docker-build-test]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract version
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: $VERSION"
+
+      - name: Create PR Summary
+        run: |
+          echo "### PR Validation ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.head_ref }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Services Validated:**" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Backend" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Frontend" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Scraper" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All checks passed! Ready for review." >> $GITHUB_STEP_SUMMARY

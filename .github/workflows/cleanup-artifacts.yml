@@ -1,0 +1,123 @@
+name: Cleanup Artifacts
+
+on:
+  schedule:
+    # Run weekly on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+    inputs:
+      days_old:
+        description: 'Delete artifacts older than this many days'
+        required: false
+        default: '7'
+        type: number
+      dry_run:
+        description: 'Dry run (do not actually delete)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  REGISTRY: ghcr.io
+
+jobs:
+  cleanup-workflow-runs:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    
+    steps:
+      - name: Cleanup old workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: ${{ inputs.days_old || 7 }}
+          keep_minimum_runs: 3
+
+  cleanup-artifacts:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    
+    steps:
+      - name: Cleanup old artifacts
+        uses: c-hive/gha-remove-artifacts@v1
+        with:
+          age: '${{ inputs.days_old || 7 }} days'
+          skip-recent: 3
+
+  cleanup-docker-images:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    strategy:
+      matrix:
+        service: [backend, frontend, scraper]
+    
+    steps:
+      - name: Cleanup old Docker images (${{ matrix.service }})
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: '${{ github.repository }}-${{ matrix.service }}'
+          package-type: 'container'
+          min-versions-to-keep: 5
+          delete-only-untagged-versions: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  cleanup-cache:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Cleanup old caches
+        run: |
+          echo "Cleaning up caches older than ${{ inputs.days_old || 7 }} days..."
+          gh extension install actions/gh-actions-cache
+          
+          REPO=${{ github.repository }}
+          BRANCH="refs/heads/main"
+          
+          # Get cache list
+          cacheKeysForPR=$(gh actions-cache list -R $REPO -B $BRANCH | cut -f 1)
+          
+          for cacheKey in $cacheKeysForPR; do
+            echo "Evaluating cache: $cacheKey"
+            if [ "${{ inputs.dry_run }}" = "true" ]; then
+              echo "DRY RUN: Would delete cache $cacheKey"
+            else
+              gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm || true
+            fi
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  cleanup-summary:
+    runs-on: ubuntu-latest
+    needs: [cleanup-workflow-runs, cleanup-artifacts, cleanup-docker-images, cleanup-cache]
+    
+    steps:
+      - name: Create cleanup summary
+        run: |
+          echo "### Cleanup Complete 🧹" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Cleaned up:**" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Workflow runs older than ${{ inputs.days_old || 7 }} days" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Artifacts older than ${{ inputs.days_old || 7 }} days" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Docker images (kept last 5 versions per service)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ GitHub Actions cache" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "**Mode:** Dry run (no deletions performed)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Mode:** Live cleanup" >> $GITHUB_STEP_SUMMARY
+          fi

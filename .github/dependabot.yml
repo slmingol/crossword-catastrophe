@@ -1,0 +1,181 @@
+version: 2
+updates:
+  # Root workspace
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "slmingol"
+    assignees:
+      - "slmingol"
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "npm"
+    groups:
+      types:
+        patterns:
+          - "@types/*"
+
+  # Backend workspace
+  - package-ecosystem: "npm"
+    directory: "/packages/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "slmingol"
+    assignees:
+      - "slmingol"
+    commit-message:
+      prefix: "chore(backend)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "backend"
+    groups:
+      express:
+        patterns:
+          - "express*"
+      database:
+        patterns:
+          - "pg"
+          - "@types/pg"
+      types:
+        patterns:
+          - "@types/*"
+
+  # Frontend workspace
+  - package-ecosystem: "npm"
+    directory: "/packages/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "slmingol"
+    assignees:
+      - "slmingol"
+    commit-message:
+      prefix: "chore(frontend)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "frontend"
+    ignore:
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+    groups:
+      react:
+        patterns:
+          - "react*"
+      vite:
+        patterns:
+          - "vite*"
+          - "@vitejs/*"
+      types:
+        patterns:
+          - "@types/*"
+
+  # Scraper workspace
+  - package-ecosystem: "npm"
+    directory: "/packages/scraper"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "slmingol"
+    assignees:
+      - "slmingol"
+    commit-message:
+      prefix: "chore(scraper)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "scraper"
+    groups:
+      database:
+        patterns:
+          - "pg"
+          - "@types/pg"
+      types:
+        patterns:
+          - "@types/*"
+
+  # Backend Docker
+  - package-ecosystem: "docker"
+    directory: "/packages/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "slmingol"
+    commit-message:
+      prefix: "chore(docker)"
+    labels:
+      - "dependencies"
+      - "docker"
+
+  # Frontend Docker
+  - package-ecosystem: "docker"
+    directory: "/packages/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "slmingol"
+    commit-message:
+      prefix: "chore(docker)"
+    labels:
+      - "dependencies"
+      - "docker"
+
+  # Scraper Docker
+  - package-ecosystem: "docker"
+    directory: "/packages/scraper"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "slmingol"
+    commit-message:
+      prefix: "chore(docker)"
+    labels:
+      - "dependencies"
+      - "docker"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "slmingol"
+    commit-message:
+      prefix: "chore(ci)"
+    labels:
+      - "dependencies"
+      - "github-actions"
