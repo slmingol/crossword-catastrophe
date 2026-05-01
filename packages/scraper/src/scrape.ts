@@ -8,9 +8,10 @@ import { parsePuzFile } from './parser.js';
 const execAsync = promisify(exec);
 
 const PUZZLE_SOURCES = [
-  { name: 'wsj', display: 'Wall Street Journal' },
-  { name: 'usa-today', display: 'USA Today' },
-  { name: 'universal', display: 'Universal Crossword' },
+  { name: 'usa', display: 'USA Today' },
+  { name: 'uni', display: 'Universal Crossword' },
+  { name: 'lat', display: 'Los Angeles Times' },
+  { name: 'nd', display: 'Newsday' },
 ];
 
 export async function scrapePuzzles() {
