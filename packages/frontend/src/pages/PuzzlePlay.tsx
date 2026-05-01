@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import Crossword from '@guardian/react-crossword';
+import { Crossword } from '@guardian/react-crossword';
 import { api, Puzzle } from '../api/client';
 
 export default function PuzzlePlay() {
