@@ -2,15 +2,20 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy root package files
+# Copy workspace configuration
 COPY package*.json ./
+
+# Copy frontend package
 COPY packages/frontend/package*.json ./packages/frontend/
+COPY packages/frontend/tsconfig*.json ./packages/frontend/
+COPY packages/frontend/vite.config.ts ./packages/frontend/
 
 # Install dependencies
 RUN npm install --workspace=frontend
 
 # Copy frontend source
-COPY packages/frontend ./packages/frontend
+COPY packages/frontend/index.html ./packages/frontend/
+COPY packages/frontend/src ./packages/frontend/src
 
 EXPOSE 3000
 

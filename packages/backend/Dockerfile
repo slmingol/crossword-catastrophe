@@ -2,19 +2,24 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy root package files
+# Copy workspace configuration
 COPY package*.json ./
+
+# Copy backend package
 COPY packages/backend/package*.json ./packages/backend/
+COPY packages/backend/tsconfig.json ./packages/backend/
 
 # Install dependencies
 RUN npm install --workspace=backend
 
-# Copy backend source
-COPY packages/backend ./packages/backend
+# Copy backend source code
+COPY packages/backend/src ./packages/backend/src
 
-# Build
+# Build TypeScript
 RUN npm run build --workspace=backend
 
 EXPOSE 3001
 
-CMD ["npm", "run", "start", "--workspace=backend"]
+WORKDIR /app/packages/backend
+
+CMD ["npm", "run", "dev", "--workspace=backend"]
