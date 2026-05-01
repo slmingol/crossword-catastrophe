@@ -1,0 +1,32 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base"
+  ],
+  "packageRules": [
+    {
+      "groupName": "all non-major dependencies",
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupSlug": "all-minor-patch"
+    },
+    {
+      "groupName": "React ecosystem",
+      "matchPackagePatterns": ["^react", "^@types/react"],
+      "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "groupName": "TypeScript and types",
+      "matchPackagePatterns": ["^@types/", "^typescript$"],
+      "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "groupName": "Docker base images",
+      "matchDatasources": ["docker"],
+      "matchUpdateTypes": ["minor", "patch"]
+    }
+  ],
+  "ignoreDeps": [],
+  "labels": ["dependencies"],
+  "assignees": ["slmingol"],
+  "reviewers": ["slmingol"]
+}
