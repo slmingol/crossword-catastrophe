@@ -6,6 +6,7 @@ export default defineConfig({
   server: {
     host: true, // Listen on all network interfaces
     port: 3000,
+    allowedHosts: 'all', // Accept requests from any hostname (required for Docker)
     proxy: {
       '/api': {
         target: 'http://localhost:3001',
