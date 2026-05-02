@@ -5,7 +5,16 @@ build/
 .env.local
 *.log
 .DS_Store
-data/
+
+# SQLite temporary files (exclude these, they're regenerated)
+*.db-wal
+*.db-shm
+
+# Allow the main database file but exclude other data
+data/*
+!data/crossword.db
+!data/.gitkeep
+
 *.puz
 *.json.bak
 coverage/

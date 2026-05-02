@@ -135,6 +135,35 @@ All puzzles are downloaded via [xword-dl](https://github.com/thisisparker/xword-
 
 All puzzle data is stored in a single SQLite database file (`data/crossword.db`). This makes backups simple - just copy the file. The database uses WAL mode for better concurrent access during scraper runs.
 
+### Database Version Control
+
+The repository includes a baseline database with 990+ puzzles. Each instance can acquire new puzzles via the daily scraper, and you can merge updates back to the repository:
+
+```bash
+# After your instance has collected new puzzles, merge them:
+./scripts/merge-database.sh
+
+# Review what changed
+git diff data/crossword.db
+
+# Commit and push the updated database
+git add data/crossword.db
+git commit -m "Update puzzle database: +50 new puzzles"
+git push
+```
+
+**Benefits:**
+- ✅ New deployments start with existing puzzle archive
+- ✅ Share puzzle collections across instances
+- ✅ Version-controlled puzzle history
+- ✅ Simple merge tool handles duplicates automatically
+
+**Notes:**
+- SQLite databases are binary files (no line-by-line diffs)
+- WAL/SHM files are temporary and excluded from git
+- The merge script uses `INSERT OR IGNORE` to avoid duplicates
+- Always pull latest before merging to avoid conflicts
+
 ## 🎮 How to Use
 
 1. Open http://localhost:3000
