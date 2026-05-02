@@ -70,17 +70,6 @@ async function scrapeSingleSourceForDate(source: string, displayName: string, da
       return;
     }
 
-    // Seattle Times Midi limitation: API only provides ~30-60 days of historical puzzles
-    // Skip STM for dates older than 30 days to avoid unnecessary errors
-    if (source === 'stm') {
-      const puzzleDate = new Date(dateStr);
-      const daysAgo = Math.floor((Date.now() - puzzleDate.getTime()) / (1000 * 60 * 60 * 24));
-      if (daysAgo > 30) {
-        console.log(`Skipping Seattle Times Midi for ${dateStr} (${daysAgo} days ago - beyond API limit of ~30 days)`);
-        return;
-      }
-    }
-
     // Download puzzle using xword-dl with date flag
     const { stdout, stderr } = await execAsync(
       `xword-dl ${source} --date "${dateStr}" --output ${outputFile}`,
