@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api, Puzzle } from '../api/client';
 
-// Interactive crossword display
+// Interactive crossword display - v2
 function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
   const solution = puzzle.grid_data?.solution || [];
   const width = puzzle.grid_data?.width || 15;
@@ -77,6 +77,7 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
       }
     } else if (e.key === 'Backspace') {
       e.preventDefault();
+      console.log('Backspace pressed at', rowIdx, colIdx);
       const newGrid = userGrid.map(row => [...row]);
       
       // Delete current cell
@@ -86,9 +87,11 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
       // Move to previous cell
       let prevCol = colIdx - 1;
       while (prevCol >= 0 && solution[rowIdx][prevCol] === '.') prevCol--;
+      console.log('Moving to previous cell:', prevCol);
       if (prevCol >= 0) {
         setTimeout(() => {
           const prevKey = `${rowIdx}-${prevCol}`;
+          console.log('Focusing prev cell:', prevKey, 'ref exists:', !!cellRefs.current[prevKey]);
           cellRefs.current[prevKey]?.focus();
         }, 0);
       }
@@ -168,7 +171,7 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
       <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
         <div style={{ 
           display: 'inline-grid',
-          gridTemplateColumns: `repeat(${width}, 40px)`,
+          gridTemplateColumns: `repeat(${width}, 34px)`,
           gap: 0,
           border: '2px solid #000'
         }}>
@@ -190,8 +193,8 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
                 onKeyDown={(e) => handleKeyDown(e, rowIdx, colIdx)}
                 onFocus={() => cell !== '.' && setFocusedCell({ row: rowIdx, col: colIdx })}
                 style={{
-                  width: '40px',
-                  height: '40px',
+                  width: '34px',
+                  height: '34px',
                   border: '1px solid #999',
                   backgroundColor: cell === '.' ? '#000' : 
                                    isFocused ? '#ffffcc' : 
@@ -202,7 +205,7 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '20px',
+                  fontSize: '17px',
                   fontWeight: 'bold',
                   cursor: cell !== '.' ? 'pointer' : 'default',
                   outline: isFocused ? '2px solid #0066cc' : 'none',
@@ -212,9 +215,9 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
                 {clueNum && (
                   <span style={{
                     position: 'absolute',
-                    top: '2px',
+                    top: '1px',
                     left: '2px',
-                    fontSize: '10px',
+                    fontSize: '8px',
                     fontWeight: 'normal',
                     color: '#333'
                   }}>
