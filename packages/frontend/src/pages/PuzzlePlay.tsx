@@ -2,18 +2,18 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api, Puzzle } from '../api/client';
 
-// Interactive crossword display - v2
-function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
+// Interactive crossword display - v3 ultra-compact
+function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid }: { 
+  puzzle: Puzzle, 
+  showSolution: boolean,
+  userGrid: string[][],
+  setUserGrid: React.Dispatch<React.SetStateAction<string[][]>>
+}) {
   const solution = puzzle.grid_data?.solution || [];
   const width = puzzle.grid_data?.width || 15;
   const height = puzzle.grid_data?.height || 15;
 
-  // Initialize empty grid for user input
-  const [userGrid, setUserGrid] = useState<string[][]>(() => 
-    solution.map(row => row.map(cell => cell === '.' ? '.' : ''))
-  );
   const [focusedCell, setFocusedCell] = useState<{row: number, col: number} | null>(null);
-  const [showSolution, setShowSolution] = useState(false);
   const cellRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   // Auto-focus cell when focusedCell changes
@@ -23,12 +23,6 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
       cellRefs.current[key]?.focus();
     }
   }, [focusedCell]);
-
-  console.log('SimpleCrossword state:', { 
-    showSolution, 
-    userGridEmpty: userGrid[0]?.[0] === '',
-    firstUserCell: userGrid[0]?.[0]
-  });
 
   // Calculate clue numbers for grid
   const clueNumbers: (number | null)[][] = solution.map(() => Array(width).fill(null));
@@ -130,46 +124,8 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
     }
   };
 
-  const checkAnswers = () => {
-    let correct = 0, total = 0;
-    solution.forEach((row, r) => {
-      row.forEach((cell, c) => {
-        if (cell !== '.') {
-          total++;
-          if (userGrid[r][c] === cell) correct++;
-        }
-      });
-    });
-    alert(`${correct} correct out of ${total}`);
-  };
-
   return (
     <div>
-      <div style={{ marginBottom: '0.5rem', display: 'flex', gap: '0.3rem' }}>
-        <button onClick={checkAnswers} style={{
-          padding: '0.25rem 0.5rem',
-          backgroundColor: '#0066cc',
-          color: 'white',
-          border: 'none',
-          borderRadius: '3px',
-          cursor: 'pointer',
-          fontSize: '0.75rem'
-        }}>
-          Check
-        </button>
-        <button onClick={() => setShowSolution(!showSolution)} style={{
-          padding: '0.25rem 0.5rem',
-          backgroundColor: '#666',
-          color: 'white',
-          border: 'none',
-          borderRadius: '3px',
-          cursor: 'pointer',
-          fontSize: '0.75rem'
-        }}>
-          {showSolution ? 'Hide' : 'Show'}
-        </button>
-      </div>
-      
       <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
         <div style={{ 
           display: 'inline-grid',
@@ -266,6 +222,8 @@ export default function PuzzlePlay() {
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showSolution, setShowSolution] = useState(false);
+  const [userGrid, setUserGrid] = useState<string[][]>([]);
 
   console.log('PuzzlePlay render:', { id, loading, hasPuzzle: !!puzzle });
 
@@ -277,6 +235,9 @@ export default function PuzzlePlay() {
         .then(data => {
           console.log('Puzzle fetched successfully:', data);
           setPuzzle(data);
+          // Initialize user grid
+          const solution = data.grid_data?.solution || [];
+          setUserGrid(solution.map(row => row.map(cell => cell === '.' ? '.' : '')));
         })
         .catch(err => {
           console.error('Error fetching puzzle:', err);
@@ -285,6 +246,21 @@ export default function PuzzlePlay() {
         .finally(() => setLoading(false));
     }
   }, [id]);
+
+  const checkAnswers = () => {
+    if (!puzzle) return;
+    const solution = puzzle.grid_data?.solution || [];
+    let correct = 0, total = 0;
+    solution.forEach((row, r) => {
+      row.forEach((cell, c) => {
+        if (cell !== '.') {
+          total++;
+          if (userGrid[r]?.[c] === cell) correct++;
+        }
+      });
+    });
+    alert(`${correct} correct out of ${total}`);
+  };
 
   if (loading) {
     return <div style={{ textAlign: 'center', padding: '4rem' }}>Loading puzzle...</div>;
@@ -308,6 +284,30 @@ export default function PuzzlePlay() {
             {puzzle.author.replace('By ', '')} • {puzzle.source} • {new Date(puzzle.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}
           </span>
         </div>
+        <div style={{ display: 'flex', gap: '0.3rem' }}>
+          <button onClick={checkAnswers} style={{
+            padding: '0.25rem 0.5rem',
+            backgroundColor: '#0066cc',
+            color: 'white',
+            border: 'none',
+            borderRadius: '3px',
+            cursor: 'pointer',
+            fontSize: '0.75rem'
+          }}>
+            Check
+          </button>
+          <button onClick={() => setShowSolution(!showSolution)} style={{
+            padding: '0.25rem 0.5rem',
+            backgroundColor: '#666',
+            color: 'white',
+            border: 'none',
+            borderRadius: '3px',
+            cursor: 'pointer',
+            fontSize: '0.75rem'
+          }}>
+            {showSolution ? 'Hide' : 'Show'}
+          </button>
+        </div>
       </div>
       <div style={{
         backgroundColor: 'white',
@@ -315,7 +315,12 @@ export default function PuzzlePlay() {
         borderRadius: '4px',
         boxShadow: '0 1px 3px rgba(0,0,0,0.08)'
       }}>
-        <SimpleCrossword puzzle={puzzle} />
+        <SimpleCrossword 
+          puzzle={puzzle} 
+          showSolution={showSolution}
+          userGrid={userGrid}
+          setUserGrid={setUserGrid}
+        />
       </div>
     </div>
   );
