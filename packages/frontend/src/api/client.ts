@@ -38,6 +38,16 @@ export interface UserProgress {
   date?: string;
 }
 
+export interface Version {
+  version: string;
+  components: {
+    backend: string;
+    frontend: string;
+    scraper: string;
+  };
+  buildDate: string;
+}
+
 export const api = {
   async getPuzzles(page = 1, limit = 20, sources?: string[]): Promise<PuzzleListResponse> {
     let url = `${API_URL}/puzzles?page=${page}&limit=${limit}`;
@@ -109,6 +119,12 @@ export const api = {
   async getNextPuzzle(puzzleId: number): Promise<{ id: number } | null> {
     const response = await fetch(`${API_URL}/puzzles/${puzzleId}/next`);
     if (!response.ok) return null;
+    return response.json();
+  },
+
+  async getVersion(): Promise<Version> {
+    const response = await fetch(`${API_URL}/version`);
+    if (!response.ok) throw new Error('Failed to fetch version');
     return response.json();
   },
 };

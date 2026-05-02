@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState, createContext, useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { api } from '../api/client';
+import { api, Version } from '../api/client';
 import SplashScreen from './SplashScreen';
 
 interface LayoutProps {
@@ -30,10 +30,18 @@ export default function Layout({ children }: LayoutProps) {
   const [actions, setActions] = useState<ReactNode>(null);
   const [navigation, setNavigation] = useState<{ onPrevious?: () => void; onNext?: () => void; hasPrevious: boolean; hasNext: boolean } | null>(null);
   const [showSplash, setShowSplash] = useState(false);
+  const [version, setVersion] = useState<Version | null>(null);
   const [theme, setTheme] = useState<Theme>(() => {
     const saved = localStorage.getItem('theme');
     return (saved === 'dark' || saved === 'light') ? saved : 'light';
   });
+
+  // Fetch version on mount
+  useEffect(() => {
+    api.getVersion()
+      .then(v => setVersion(v))
+      .catch(err => console.error('Failed to fetch version:', err));
+  }, []);
 
   // Apply theme to document
   useEffect(() => {
@@ -254,11 +262,25 @@ export default function Layout({ children }: LayoutProps) {
         <footer style={{
           backgroundColor: colors.footerBg,
           padding: '1rem',
-          textAlign: 'center',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
           color: colors.footerText,
-          transition: 'background-color 0.3s, color 0.3s'
+          transition: 'background-color 0.3s, color 0.3s',
+          flexWrap: 'wrap',
+          gap: '0.5rem'
         }}>
-          <p>Self-hosted Crossword Archive</p>
+          <p style={{ margin: 0 }}>Self-hosted Crossword Archive</p>
+          {version && (
+            <p style={{ 
+              margin: 0, 
+              fontSize: '0.85rem',
+              opacity: 0.8,
+              textAlign: 'right'
+            }} title={`Backend: ${version.components.backend}, Frontend: ${version.components.frontend}, Scraper: ${version.components.scraper}`}>
+              v{version.version}
+            </p>
+          )}
         </footer>
       </div>
     </PuzzleActionsContext.Provider>
