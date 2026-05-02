@@ -10,6 +10,7 @@ const SOURCE_CONFIG: Record<string, { abbr: string; color: string; bg: string; d
   'Universal Crossword': { abbr: 'UNI', color: '#6554c0', bg: '#eae6ff', description: 'Universal syndicated crosswords' },
   'Los Angeles Times': { abbr: 'LAT', color: '#00875a', bg: '#e3fcef', description: 'LA Times daily crosswords' },
   'Newsday': { abbr: 'ND', color: '#ff5630', bg: '#ffebe6', description: 'Newsday crossword puzzles' },
+  'Seattle Times Midi': { abbr: 'SEA', color: '#ff8b00', bg: '#fff4e6', description: 'Smaller puzzles for mobile' },
 };
 
 function SourceBadge({ source, theme }: { source: string; theme: 'light' | 'dark' }) {
