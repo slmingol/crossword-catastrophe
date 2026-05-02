@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { api, Puzzle } from '../api/client';
 
-// Interactive crossword display - v4 buttons in toolbar
+// Interactive crossword display - v5 black toolbar
 function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid }: { 
   puzzle: Puzzle, 
   showSolution: boolean,
@@ -276,38 +276,29 @@ export default function PuzzlePlay() {
 
   return (
     <div>
-      <div style={{ marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#1a1a1a', color: 'white', padding: '0.5rem 0.75rem', borderRadius: '4px' }}>
-        <div>
-          <Link to="/" style={{ color: '#66b3ff', textDecoration: 'none', fontSize: '0.8rem', marginRight: '1rem' }}>← Back</Link>
-          <span style={{ fontSize: '0.9rem', fontWeight: '600' }}>{puzzle.title}</span>
-          <span style={{ color: '#ccc', fontSize: '0.75rem', marginLeft: '0.75rem' }}>
-            {puzzle.author.replace('By ', '')} • {puzzle.source} • {new Date(puzzle.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}
-          </span>
-        </div>
-        <div style={{ display: 'flex', gap: '0.4rem' }}>
-          <button onClick={checkAnswers} style={{
-            padding: '0.3rem 0.6rem',
-            backgroundColor: '#0066cc',
-            color: 'white',
-            border: 'none',
-            borderRadius: '3px',
-            cursor: 'pointer',
-            fontSize: '0.8rem'
-          }}>
-            Check
-          </button>
-          <button onClick={() => setShowSolution(!showSolution)} style={{
-            padding: '0.3rem 0.6rem',
-            backgroundColor: '#555',
-            color: 'white',
-            border: 'none',
-            borderRadius: '3px',
-            cursor: 'pointer',
-            fontSize: '0.8rem'
-          }}>
-            {showSolution ? 'Hide' : 'Show'}
-          </button>
-        </div>
+      <div style={{ marginBottom: '0.5rem', display: 'flex', gap: '0.4rem' }}>
+        <button onClick={checkAnswers} style={{
+          padding: '0.3rem 0.6rem',
+          backgroundColor: '#0066cc',
+          color: 'white',
+          border: 'none',
+          borderRadius: '3px',
+          cursor: 'pointer',
+          fontSize: '0.8rem'
+        }}>
+          Check
+        </button>
+        <button onClick={() => setShowSolution(!showSolution)} style={{
+          padding: '0.3rem 0.6rem',
+          backgroundColor: '#555',
+          color: 'white',
+          border: 'none',
+          borderRadius: '3px',
+          cursor: 'pointer',
+          fontSize: '0.8rem'
+        }}>
+          {showSolution ? 'Hide' : 'Show'}
+        </button>
       </div>
       <div style={{
         backgroundColor: 'white',
