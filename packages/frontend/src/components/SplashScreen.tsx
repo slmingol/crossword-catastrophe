@@ -70,7 +70,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
       >
         <img
           src="/logo.png"
-          alt="Crossword Catastrophe"
+          alt="Crossword Cat-a-strophe"
           style={{
             width: animationPhase === 'move' ? '3.5rem' : '45rem',
             height: 'auto',
@@ -89,7 +89,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
             animation: animationPhase === 'show' ? 'fadeIn 0.8s ease-out 0.3s both' : 'none'
           }}
         >
-          Crossword Catastrophe
+          Crossword Cat-a-strophe
         </h1>
       </div>
       

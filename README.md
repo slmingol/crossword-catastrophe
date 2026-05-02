@@ -1,7 +1,7 @@
-# Crossword Catastrophe
+# Crossword Cat-a-strophe
 
 <div align="center">
-  <img src="packages/frontend/public/logo.png" alt="Crossword Catastrophe Logo" width="300" />
+  <img src="packages/frontend/public/logo.png" alt="Crossword Cat-a-strophe Logo" width="300" />
 </div>
 
 <div align="center">
