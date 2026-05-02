@@ -12,6 +12,7 @@ const PUZZLE_SOURCES = [
   { name: 'uni', display: 'Universal Crossword' },
   { name: 'lat', display: 'Los Angeles Times' },
   { name: 'nd', display: 'Newsday' },
+  { name: 'stm', display: 'Seattle Times Midi' },
 ];
 
 export async function scrapePuzzles() {

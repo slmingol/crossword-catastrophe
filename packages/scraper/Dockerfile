@@ -6,8 +6,11 @@ RUN apt-get update && apt-get install -y curl git && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
 
-# Install xword-dl from PR#331 (fixes Amuselabs)
-RUN pip install --no-cache-dir git+https://github.com/thisisparker/xword-dl.git@refs/pull/331/head
+# Copy local xword-dl fork with Seattle Times Midi support
+COPY xword-dl /tmp/xword-dl
+
+# Install xword-dl from local copy
+RUN pip install --no-cache-dir /tmp/xword-dl && rm -rf /tmp/xword-dl
 
 WORKDIR /app
 
