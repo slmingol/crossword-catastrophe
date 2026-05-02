@@ -1,18 +1,6 @@
-// Construct API URL based on current hostname
-// If VITE_API_URL is set (for development), use it
-// Otherwise, use the current hostname with port 9998
-const getApiUrl = () => {
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
-  }
-  
-  // In production, construct URL from current hostname
-  const protocol = window.location.protocol;
-  const hostname = window.location.hostname;
-  return `${protocol}//${hostname}:9998/api`;
-};
-
-const API_URL = getApiUrl();
+// Use relative /api path for production (works with reverse proxy)
+// Or use VITE_API_URL if set (for development/testing)
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 export interface Puzzle {
   id: number;
