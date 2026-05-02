@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { api, Puzzle } from '../api/client';
 import { usePuzzleActions } from '../components/Layout';
@@ -293,7 +293,7 @@ export default function PuzzlePlay() {
     return allCorrect;
   };
 
-  const checkAnswers = () => {
+  const checkAnswers = useCallback(() => {
     if (!puzzle) return;
     const solution = puzzle.grid_data?.solution || [];
     let correct = 0, total = 0;
@@ -318,7 +318,7 @@ export default function PuzzlePlay() {
     } else {
       alert(`${correct} correct out of ${total}`);
     }
-  };
+  }, [puzzle, userGrid, timeSpent, startTime, id]);
 
   // Set actions in nav bar
   useEffect(() => {
@@ -351,7 +351,7 @@ export default function PuzzlePlay() {
       );
     }
     return () => setActions(null);
-  }, [puzzle, showSolution, setActions, userGrid, timeSpent, startTime, id]);
+  }, [puzzle, showSolution, setActions, checkAnswers]);
 
   if (loading) {
     return <div style={{ textAlign: 'center', padding: '4rem' }}>Loading puzzle...</div>;
