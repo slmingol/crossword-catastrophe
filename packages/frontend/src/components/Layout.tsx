@@ -9,7 +9,8 @@ interface LayoutProps {
 // Context for puzzle page actions
 const PuzzleActionsContext = createContext<{
   setActions: (actions: ReactNode) => void;
-}>({ setActions: () => {} });
+  setNavigation: (navigation: { onPrevious?: () => void; onNext?: () => void; hasPrevious: boolean; hasNext: boolean } | null) => void;
+}>({ setActions: () => {}, setNavigation: () => {} });
 
 export const usePuzzleActions = () => useContext(PuzzleActionsContext);
 
@@ -17,6 +18,7 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const [puzzleInfo, setPuzzleInfo] = useState<any>(null);
   const [actions, setActions] = useState<ReactNode>(null);
+  const [navigation, setNavigation] = useState<{ onPrevious?: () => void; onNext?: () => void; hasPrevious: boolean; hasNext: boolean } | null>(null);
   
   // Extract puzzle ID from URL
   const puzzleMatch = location.pathname.match(/\/puzzle\/(\d+)/);
@@ -30,11 +32,12 @@ export default function Layout({ children }: LayoutProps) {
     } else {
       setPuzzleInfo(null);
       setActions(null);
+      setNavigation(null);
     }
   }, [puzzleId]);
 
   return (
-    <PuzzleActionsContext.Provider value={{ setActions }}>
+    <PuzzleActionsContext.Provider value={{ setActions, setNavigation }}>
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <header style={{
           backgroundColor: '#1a1a1a',
@@ -62,7 +65,43 @@ export default function Layout({ children }: LayoutProps) {
               {puzzleInfo && (
                 <>
                   <span style={{ color: '#666' }}>|</span>
+                  {navigation && (
+                    <button
+                      onClick={navigation.onPrevious}
+                      disabled={!navigation.hasPrevious}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: navigation.hasPrevious ? 'white' : '#666',
+                        fontSize: '1.2rem',
+                        cursor: navigation.hasPrevious ? 'pointer' : 'not-allowed',
+                        padding: '0 0.3rem',
+                        opacity: navigation.hasPrevious ? 1 : 0.5
+                      }}
+                      title="Previous puzzle"
+                    >
+                      ←
+                    </button>
+                  )}
                   <span style={{ fontSize: '0.9rem', fontWeight: '600', whiteSpace: 'nowrap' }}>{puzzleInfo.title}</span>
+                  {navigation && (
+                    <button
+                      onClick={navigation.onNext}
+                      disabled={!navigation.hasNext}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: navigation.hasNext ? 'white' : '#666',
+                        fontSize: '1.2rem',
+                        cursor: navigation.hasNext ? 'pointer' : 'not-allowed',
+                        padding: '0 0.3rem',
+                        opacity: navigation.hasNext ? 1 : 0.5
+                      }}
+                      title="Next puzzle"
+                    >
+                      →
+                    </button>
+                  )}
                   <span style={{ color: '#ccc', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
                     {puzzleInfo.author.replace('By ', '')} • {puzzleInfo.source} • {new Date(puzzleInfo.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}
                   </span>

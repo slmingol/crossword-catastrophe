@@ -29,16 +29,52 @@ export async function scrapePuzzles() {
   console.log('Scrape completed');
 }
 
+export async function scrapeHistoricalPuzzles(daysBack: number = 50) {
+  console.log(`Starting historical scrape for last ${daysBack} days at ${new Date().toISOString()}`);
+  
+  for (let i = 1; i <= daysBack; i++) {
+    const targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() - i);
+    const dateStr = targetDate.toISOString().split('T')[0];
+    
+    console.log(`\nScraping puzzles for ${dateStr} (${i}/${daysBack})...`);
+    
+    for (const source of PUZZLE_SOURCES) {
+      try {
+        await scrapeSingleSourceForDate(source.name, source.display, dateStr);
+      } catch (error) {
+        console.error(`Failed to scrape ${source.display} for ${dateStr}:`, error);
+      }
+    }
+  }
+  
+  console.log('\nHistorical scrape completed');
+}
+
 async function scrapeSingleSource(source: string, displayName: string) {
   const today = new Date().toISOString().split('T')[0];
+  return scrapeSingleSourceForDate(source, displayName, today);
+}
+
+async function scrapeSingleSourceForDate(source: string, displayName: string, dateStr: string) {
   const outputDir = '/tmp/puzzles';
-  const outputFile = path.join(outputDir, `${source}-${today}.puz`);
+  const outputFile = path.join(outputDir, `${source}-${dateStr}.puz`);
 
   try {
-    // Download puzzle using xword-dl
-    // Note: xword-dl must be installed in the container
+    // Check if puzzle already exists before downloading
+    const existing = await db.query(
+      'SELECT id FROM puzzles WHERE source = $1 AND date = $2',
+      [displayName, dateStr]
+    );
+
+    if (existing.rows.length > 0) {
+      console.log(`Puzzle from ${displayName} for ${dateStr} already exists, skipping`);
+      return;
+    }
+
+    // Download puzzle using xword-dl with date flag
     const { stdout, stderr } = await execAsync(
-      `xword-dl ${source} --output ${outputFile}`,
+      `xword-dl ${source} --date "${dateStr}" --output ${outputFile}`,
       { timeout: 30000 }
     );
 
@@ -50,18 +86,6 @@ async function scrapeSingleSource(source: string, displayName: string) {
     const fileBuffer = await readFile(outputFile);
     const puzzleData = parsePuzFile(fileBuffer);
 
-    // Check if puzzle already exists
-    const existing = await db.query(
-      'SELECT id FROM puzzles WHERE source = $1 AND date = $2',
-      [displayName, today]
-    );
-
-    if (existing.rows.length > 0) {
-      console.log(`Puzzle from ${displayName} for ${today} already exists, skipping`);
-      await unlink(outputFile);
-      return;
-    }
-
     // Store in database
     await db.query(
       `INSERT INTO puzzles (title, author, source, date, difficulty, grid_data, clues_across, clues_down)
@@ -70,7 +94,7 @@ async function scrapeSingleSource(source: string, displayName: string) {
         puzzleData.title,
         puzzleData.author,
         displayName,
-        today,
+        dateStr,
         puzzleData.difficulty,
         JSON.stringify(puzzleData.grid),
         JSON.stringify(puzzleData.cluesAcross),
@@ -78,7 +102,7 @@ async function scrapeSingleSource(source: string, displayName: string) {
       ]
     );
 
-    console.log(`Successfully saved ${displayName} puzzle for ${today}`);
+    console.log(`Successfully saved ${displayName} puzzle for ${dateStr}`);
 
     // Clean up
     await unlink(outputFile);

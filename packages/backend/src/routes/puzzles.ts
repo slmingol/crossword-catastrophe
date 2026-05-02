@@ -183,3 +183,77 @@ puzzleRouter.get('/progress/:userId', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch user progress' });
   }
 });
+
+// Get previous puzzle
+puzzleRouter.get('/:id/previous', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Get current puzzle's date
+    const currentResult = await db.query(
+      'SELECT date FROM puzzles WHERE id = $1',
+      [id]
+    );
+    
+    if (currentResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Puzzle not found' });
+    }
+    
+    const currentDate = currentResult.rows[0].date;
+    
+    // Get the most recent puzzle before this date
+    const result = await db.query(
+      `SELECT id FROM puzzles
+       WHERE date < $1
+       ORDER BY date DESC, id DESC
+       LIMIT 1`,
+      [currentDate]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'No previous puzzle' });
+    }
+    
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error fetching previous puzzle:', error);
+    res.status(500).json({ error: 'Failed to fetch previous puzzle' });
+  }
+});
+
+// Get next puzzle
+puzzleRouter.get('/:id/next', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Get current puzzle's date
+    const currentResult = await db.query(
+      'SELECT date FROM puzzles WHERE id = $1',
+      [id]
+    );
+    
+    if (currentResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Puzzle not found' });
+    }
+    
+    const currentDate = currentResult.rows[0].date;
+    
+    // Get the earliest puzzle after this date
+    const result = await db.query(
+      `SELECT id FROM puzzles
+       WHERE date > $1
+       ORDER BY date ASC, id ASC
+       LIMIT 1`,
+      [currentDate]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'No next puzzle' });
+    }
+    
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error fetching next puzzle:', error);
+    res.status(500).json({ error: 'Failed to fetch next puzzle' });
+  }
+});

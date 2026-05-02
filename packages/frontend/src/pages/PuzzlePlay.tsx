@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { api, Puzzle } from '../api/client';
 import { usePuzzleActions } from '../components/Layout';
 
@@ -220,6 +220,7 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid }: {
 
 export default function PuzzlePlay() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -228,7 +229,9 @@ export default function PuzzlePlay() {
   const [startTime] = useState(Date.now());
   const [timeSpent, setTimeSpent] = useState(0);
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'info' } | null>(null);
-  const { setActions } = usePuzzleActions();
+  const [hasPrevious, setHasPrevious] = useState(false);
+  const [hasNext, setHasNext] = useState(false);
+  const { setActions, setNavigation } = usePuzzleActions();
 
   console.log('PuzzlePlay render:', { id, loading, hasPuzzle: !!puzzle });
 
@@ -239,12 +242,16 @@ export default function PuzzlePlay() {
       console.log('Fetching puzzle', id);
       Promise.all([
         api.getPuzzle(parseInt(id)),
-        api.getPuzzleProgress(parseInt(id))
+        api.getPuzzleProgress(parseInt(id)),
+        api.getPreviousPuzzle(parseInt(id)),
+        api.getNextPuzzle(parseInt(id))
       ])
-        .then(([puzzleData, progress]) => {
+        .then(([puzzleData, progress, prev, next]) => {
           console.log('Puzzle fetched successfully:', puzzleData);
           console.log('Progress loaded:', progress);
           setPuzzle(puzzleData);
+          setHasPrevious(!!prev);
+          setHasNext(!!next);
           
           // Initialize user grid from saved progress or empty
           const solution = puzzleData.grid_data?.solution || [];
@@ -334,6 +341,22 @@ export default function PuzzlePlay() {
     setTimeout(() => setNotification(null), 5000);
   }, [puzzle, userGrid, timeSpent, startTime, id]);
 
+  const handlePrevious = useCallback(async () => {
+    if (!id) return;
+    const prev = await api.getPreviousPuzzle(parseInt(id));
+    if (prev) {
+      navigate(`/puzzle/${prev.id}`);
+    }
+  }, [id, navigate]);
+
+  const handleNext = useCallback(async () => {
+    if (!id) return;
+    const next = await api.getNextPuzzle(parseInt(id));
+    if (next) {
+      navigate(`/puzzle/${next.id}`);
+    }
+  }, [id, navigate]);
+
   // Set actions in nav bar
   useEffect(() => {
     console.log('Setting actions in nav bar, puzzle:', !!puzzle, 'checkAnswers:', typeof checkAnswers);
@@ -370,6 +393,19 @@ export default function PuzzlePlay() {
     }
     return () => setActions(null);
   }, [puzzle, showSolution, setActions, checkAnswers]);
+
+  // Set navigation in nav bar
+  useEffect(() => {
+    if (puzzle) {
+      setNavigation({
+        onPrevious: handlePrevious,
+        onNext: handleNext,
+        hasPrevious,
+        hasNext
+      });
+    }
+    return () => setNavigation(null);
+  }, [puzzle, hasPrevious, hasNext, handlePrevious, handleNext, setNavigation]);
 
   if (loading) {
     return <div style={{ textAlign: 'center', padding: '4rem' }}>Loading puzzle...</div>;

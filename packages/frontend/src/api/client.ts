@@ -93,4 +93,16 @@ export const api = {
     if (!response.ok) throw new Error('Failed to save progress');
     return response.json();
   },
+
+  async getPreviousPuzzle(puzzleId: number): Promise<{ id: number } | null> {
+    const response = await fetch(`${API_URL}/puzzles/${puzzleId}/previous`);
+    if (!response.ok) return null;
+    return response.json();
+  },
+
+  async getNextPuzzle(puzzleId: number): Promise<{ id: number } | null> {
+    const response = await fetch(`${API_URL}/puzzles/${puzzleId}/next`);
+    if (!response.ok) return null;
+    return response.json();
+  },
 };
