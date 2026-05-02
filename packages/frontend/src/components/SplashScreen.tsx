@@ -80,7 +80,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         <h1
           style={{
             color: 'white',
-            fontSize: animationPhase === 'move' ? '1.5rem' : '4.5rem',
+            fontSize: animationPhase === 'move' ? '1.5rem' : '3rem',
             fontWeight: 'bold',
             margin: 0,
             whiteSpace: 'nowrap',
