@@ -9,10 +9,10 @@ const execAsync = promisify(exec);
 
 const PUZZLE_SOURCES = [
   { name: 'usa', display: 'USA Today' },
-  { name: 'uni', display: 'Universal Crossword' },
-  // Temporarily disabled - xword-dl can't parse these sites anymore (as of May 2026)
-  // { name: 'lat', display: 'Los Angeles Times' },
-  // { name: 'nd', display: 'Newsday' },
+  // Temporarily disabled - xword-dl failing to parse these (as of May 2026)
+  // { name: 'uni', display: 'Universal Crossword' }, // Failed 5/2: TypeError parsing Width
+  // { name: 'lat', display: 'Los Angeles Times' }, // Picker page changed
+  // { name: 'nd', display: 'Newsday' }, // Picker page changed
 ];
 
 export async function scrapePuzzles() {
