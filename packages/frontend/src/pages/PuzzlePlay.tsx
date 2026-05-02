@@ -2,22 +2,99 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api, Puzzle } from '../api/client';
 
-// Temporary simple crossword display
+// Interactive crossword display
 function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
   const solution = puzzle.grid_data?.solution || [];
   const width = puzzle.grid_data?.width || 15;
   const height = puzzle.grid_data?.height || 15;
 
-  console.log('SimpleCrossword render:', {
-    hasSolution: !!solution.length,
-    solutionLength: solution.length,
-    width,
-    height,
-    firstRow: solution[0]
-  });
+  // Initialize empty grid for user input
+  const [userGrid, setUserGrid] = useState<string[][]>(() => 
+    solution.map(row => row.map(cell => cell === '.' ? '.' : ''))
+  );
+  const [focusedCell, setFocusedCell] = useState<{row: number, col: number} | null>(null);
+  const [showSolution, setShowSolution] = useState(false);
+
+  const handleCellClick = (rowIdx: number, colIdx: number) => {
+    if (solution[rowIdx][colIdx] !== '.') {
+      setFocusedCell({ row: rowIdx, col: colIdx });
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent, rowIdx: number, colIdx: number) => {
+    if (solution[rowIdx][colIdx] === '.') return;
+
+    if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
+      const newGrid = userGrid.map(row => [...row]);
+      newGrid[rowIdx][colIdx] = e.key.toUpperCase();
+      setUserGrid(newGrid);
+      
+      // Move to next cell
+      let nextCol = colIdx + 1;
+      while (nextCol < width && solution[rowIdx][nextCol] === '.') nextCol++;
+      if (nextCol < width) {
+        setFocusedCell({ row: rowIdx, col: nextCol });
+      }
+    } else if (e.key === 'Backspace') {
+      const newGrid = userGrid.map(row => [...row]);
+      newGrid[rowIdx][colIdx] = '';
+      setUserGrid(newGrid);
+    } else if (e.key === 'ArrowRight') {
+      let nextCol = colIdx + 1;
+      while (nextCol < width && solution[rowIdx][nextCol] === '.') nextCol++;
+      if (nextCol < width) setFocusedCell({ row: rowIdx, col: nextCol });
+    } else if (e.key === 'ArrowLeft') {
+      let prevCol = colIdx - 1;
+      while (prevCol >= 0 && solution[rowIdx][prevCol] === '.') prevCol--;
+      if (prevCol >= 0) setFocusedCell({ row: rowIdx, col: prevCol });
+    } else if (e.key === 'ArrowDown') {
+      let nextRow = rowIdx + 1;
+      while (nextRow < height && solution[nextRow][colIdx] === '.') nextRow++;
+      if (nextRow < height) setFocusedCell({ row: nextRow, col: colIdx });
+    } else if (e.key === 'ArrowUp') {
+      let prevRow = rowIdx - 1;
+      while (prevRow >= 0 && solution[prevRow][colIdx] === '.') prevRow--;
+      if (prevRow >= 0) setFocusedCell({ row: prevRow, col: colIdx });
+    }
+  };
+
+  const checkAnswers = () => {
+    let correct = 0, total = 0;
+    solution.forEach((row, r) => {
+      row.forEach((cell, c) => {
+        if (cell !== '.') {
+          total++;
+          if (userGrid[r][c] === cell) correct++;
+        }
+      });
+    });
+    alert(`${correct} correct out of ${total}`);
+  };
 
   return (
     <div>
+      <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem' }}>
+        <button onClick={checkAnswers} style={{
+          padding: '0.5rem 1rem',
+          backgroundColor: '#0066cc',
+          color: 'white',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer'
+        }}>
+          Check Answers
+        </button>
+        <button onClick={() => setShowSolution(!showSolution)} style={{
+          padding: '0.5rem 1rem',
+          backgroundColor: '#666',
+          color: 'white',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer'
+        }}>
+          {showSolution ? 'Hide' : 'Reveal'} Solution
+        </button>
+      </div>
       <div style={{ 
         display: 'inline-grid',
         gridTemplateColumns: `repeat(${width}, 40px)`,
@@ -26,25 +103,43 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
         marginBottom: '2rem'
       }}>
         {solution.map((row: string[], rowIdx: number) => 
-          row.map((cell: string, colIdx: number) => (
-            <div
-              key={`${rowIdx}-${colIdx}`}
-              style={{
-                width: '40px',
-                height: '40px',
-                border: '1px solid #999',
-                backgroundColor: cell === '.' ? '#000' : '#fff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '20px',
-                fontWeight: 'bold',
-                cursor: cell !== '.' ? 'pointer' : 'default'
-              }}
-            >
-              {cell !== '.' && cell !== '' ? cell : ''}
-            </div>
-          ))
+          row.map((cell: string, colIdx: number) => {
+            const isFocused = focusedCell?.row === rowIdx && focusedCell?.col === colIdx;
+            const userValue = userGrid[rowIdx]?.[colIdx] || '';
+            const displayValue = showSolution ? cell : userValue;
+            const isCorrect = userValue && userValue === cell;
+            const isWrong = userValue && userValue !== cell && userValue !== '';
+            
+            return (
+              <div
+                key={`${rowIdx}-${colIdx}`}
+                tabIndex={cell !== '.' ? 0 : -1}
+                onClick={() => handleCellClick(rowIdx, colIdx)}
+                onKeyDown={(e) => handleKeyDown(e, rowIdx, colIdx)}
+                onFocus={() => cell !== '.' && setFocusedCell({ row: rowIdx, col: colIdx })}
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  border: '1px solid #999',
+                  backgroundColor: cell === '.' ? '#000' : 
+                                   isFocused ? '#ffffcc' : 
+                                   showSolution ? '#e6f7ff' :
+                                   isCorrect ? '#d4edda' :
+                                   isWrong ? '#f8d7da' :
+                                   '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '20px',
+                  fontWeight: 'bold',
+                  cursor: cell !== '.' ? 'pointer' : 'default',
+                  outline: isFocused ? '2px solid #0066cc' : 'none'
+                }}
+              >
+                {cell !== '.' ? displayValue : ''}
+              </div>
+            );
+          })
         )}
       </div>
       
@@ -130,9 +225,6 @@ export default function PuzzlePlay() {
         </p>
         <p style={{ color: '#888', fontSize: '0.9rem' }}>
           {new Date(puzzle.date).toLocaleDateString()}
-        </p>
-        <p style={{ color: '#f60', fontSize: '0.9rem', fontStyle: 'italic', marginTop: '1rem' }}>
-          Note: Interactive puzzle coming soon - currently showing solution
         </p>
       </div>
       <div style={{
