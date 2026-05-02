@@ -305,18 +305,15 @@ export default function PuzzlePlay() {
       </div>
       <div style={{
         backgroundColor: 'white',
-        padding: '1rem',
+        padding: '0.75rem 1rem',
         borderRadius: '6px',
         boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
         marginBottom: '1rem'
       }}>
-        <h1 style={{ marginBottom: '0.25rem', fontSize: '1.5rem' }}>{puzzle.title}</h1>
-        <p style={{ color: '#666', fontSize: '0.85rem', marginBottom: '0.25rem' }}>
+        <h1 style={{ marginBottom: '0.15rem', fontSize: '1.25rem', lineHeight: '1.3' }}>{puzzle.title}</h1>
+        <p style={{ color: '#666', fontSize: '0.8rem', margin: 0, lineHeight: '1.4' }}>
           By {puzzle.author} • {puzzle.source}
-          {puzzle.difficulty && ` • ${puzzle.difficulty}`}
-        </p>
-        <p style={{ color: '#888', fontSize: '0.8rem' }}>
-          {new Date(puzzle.date).toLocaleDateString()}
+          {puzzle.difficulty && ` • ${puzzle.difficulty}`} • {new Date(puzzle.date).toLocaleDateString()}
         </p>
       </div>
       <div style={{
