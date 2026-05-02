@@ -25,10 +25,12 @@ CREATE TABLE IF NOT EXISTS user_progress (
   progress_data JSONB,
   completed BOOLEAN DEFAULT FALSE,
   time_spent INTEGER DEFAULT 0,
-  last_updated TIMESTAMP DEFAULT NOW()
+  last_updated TIMESTAMP DEFAULT NOW(),
+  UNIQUE(puzzle_id, user_id)
 );
 
 CREATE INDEX IF NOT EXISTS idx_user_progress_puzzle ON user_progress(puzzle_id);
+CREATE INDEX IF NOT EXISTS idx_user_progress_user ON user_progress(user_id, last_updated DESC);
 `;
 
 async function migrate() {

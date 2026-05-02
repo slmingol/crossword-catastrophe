@@ -225,21 +225,34 @@ export default function PuzzlePlay() {
   const [error, setError] = useState<string | null>(null);
   const [showSolution, setShowSolution] = useState(false);
   const [userGrid, setUserGrid] = useState<string[][]>([]);
+  const [startTime] = useState(Date.now());
+  const [timeSpent, setTimeSpent] = useState(0);
   const { setActions } = usePuzzleActions();
 
   console.log('PuzzlePlay render:', { id, loading, hasPuzzle: !!puzzle });
 
+  // Load puzzle and saved progress
   useEffect(() => {
     console.log('PuzzlePlay useEffect triggered, id:', id);
     if (id) {
       console.log('Fetching puzzle', id);
-      api.getPuzzle(parseInt(id))
-        .then(data => {
-          console.log('Puzzle fetched successfully:', data);
-          setPuzzle(data);
-          // Initialize user grid
-          const solution = data.grid_data?.solution || [];
-          setUserGrid(solution.map(row => row.map(cell => cell === '.' ? '.' : '')));
+      Promise.all([
+        api.getPuzzle(parseInt(id)),
+        api.getPuzzleProgress(parseInt(id))
+      ])
+        .then(([puzzleData, progress]) => {
+          console.log('Puzzle fetched successfully:', puzzleData);
+          console.log('Progress loaded:', progress);
+          setPuzzle(puzzleData);
+          
+          // Initialize user grid from saved progress or empty
+          const solution = puzzleData.grid_data?.solution || [];
+          if (progress && progress.progress_data) {
+            setUserGrid(progress.progress_data);
+            setTimeSpent(progress.time_spent || 0);
+          } else {
+            setUserGrid(solution.map(row => row.map(cell => cell === '.' ? '.' : '')));
+          }
         })
         .catch(err => {
           console.error('Error fetching puzzle:', err);
@@ -248,6 +261,37 @@ export default function PuzzlePlay() {
         .finally(() => setLoading(false));
     }
   }, [id]);
+
+  // Auto-save progress every 30 seconds
+  useEffect(() => {
+    if (!puzzle || !id) return;
+
+    const interval = setInterval(() => {
+      const currentTimeSpent = timeSpent + Math.floor((Date.now() - startTime) / 1000);
+      setTimeSpent(currentTimeSpent);
+      
+      const isComplete = checkIfComplete();
+      api.saveProgress(parseInt(id), userGrid, isComplete, currentTimeSpent)
+        .then(() => console.log('Progress auto-saved'))
+        .catch(err => console.error('Failed to save progress:', err));
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [puzzle, id, userGrid, startTime, timeSpent]);
+
+  const checkIfComplete = () => {
+    if (!puzzle) return false;
+    const solution = puzzle.grid_data?.solution || [];
+    let allCorrect = true;
+    solution.forEach((row, r) => {
+      row.forEach((cell, c) => {
+        if (cell !== '.' && userGrid[r]?.[c] !== cell) {
+          allCorrect = false;
+        }
+      });
+    });
+    return allCorrect;
+  };
 
   const checkAnswers = () => {
     if (!puzzle) return;
@@ -261,7 +305,19 @@ export default function PuzzlePlay() {
         }
       });
     });
-    alert(`${correct} correct out of ${total}`);
+    
+    const isComplete = correct === total;
+    const currentTimeSpent = timeSpent + Math.floor((Date.now() - startTime) / 1000);
+    
+    // Save progress with completion status
+    api.saveProgress(parseInt(id!), userGrid, isComplete, currentTimeSpent)
+      .catch(err => console.error('Failed to save progress:', err));
+    
+    if (isComplete) {
+      alert(`Congratulations! You completed the puzzle!\n${correct} out of ${total} correct in ${Math.floor(currentTimeSpent / 60)} minutes!`);
+    } else {
+      alert(`${correct} correct out of ${total}`);
+    }
   };
 
   // Set actions in nav bar
