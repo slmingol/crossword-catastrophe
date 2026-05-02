@@ -72,7 +72,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           src="/logo.png"
           alt="Crossword Catastrophe"
           style={{
-            width: animationPhase === 'move' ? '3.5rem' : '20rem',
+            width: animationPhase === 'move' ? '3.5rem' : '30rem',
             height: 'auto',
             transition: 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)',
           }}
@@ -80,7 +80,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         <h1
           style={{
             color: 'white',
-            fontSize: animationPhase === 'move' ? '1.5rem' : '3rem',
+            fontSize: animationPhase === 'move' ? '1.5rem' : '4.5rem',
             fontWeight: 'bold',
             margin: 0,
             whiteSpace: 'nowrap',
