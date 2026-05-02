@@ -82,7 +82,9 @@ export default function Layout({ children }: LayoutProps) {
               justifyContent: 'center',
               gap: '1.5rem',
               paddingBottom: puzzleInfo ? '0.75rem' : '0',
-              borderBottom: puzzleInfo ? '1px solid #333' : 'none'
+              borderBottom: puzzleInfo ? '1px solid #333' : 'none',
+              opacity: showSplash ? 0 : 1,
+              transition: 'opacity 0.5s ease-in'
             }}>
               <Link to="/" style={{ 
                 color: 'white', 

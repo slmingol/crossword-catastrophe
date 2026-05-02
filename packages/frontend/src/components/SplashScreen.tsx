@@ -13,7 +13,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
       setAnimationPhase('move');
     }, 3000);
 
-    // Complete animation after move (1 second for animation)
+    // Complete animation after move (1.5 seconds for animation)
     const completeTimer = setTimeout(() => {
       setAnimationPhase('complete');
       onComplete();
@@ -28,6 +28,12 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
   if (animationPhase === 'complete') {
     return null;
   }
+
+  // Calculate the exact header logo position
+  // Header padding is 0.75rem (12px) top, 2rem (32px) left
+  // Plus the centered content with logo at position
+  const headerLogoTop = '1.5rem'; // Approximation of centered position in header
+  const headerLogoLeft = 'calc(50% - 12rem)'; // Center minus half of logo+text width
 
   return (
     <>
@@ -49,16 +55,16 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
       <div
         style={{
           position: 'fixed',
-          top: animationPhase === 'move' ? '1.75rem' : '50%',
-          left: animationPhase === 'move' ? '2rem' : '50%',
+          top: animationPhase === 'move' ? headerLogoTop : '50%',
+          left: animationPhase === 'move' ? headerLogoLeft : '50%',
           transform: animationPhase === 'move' 
-            ? 'translate(0, 0)' 
+            ? 'translate(0, -50%)' 
             : 'translate(-50%, -50%)',
           zIndex: 10000,
           display: 'flex',
-          flexDirection: 'column',
+          flexDirection: 'row',
           alignItems: 'center',
-          gap: animationPhase === 'move' ? '0' : '2rem',
+          gap: animationPhase === 'move' ? '0.75rem' : '2rem',
           transition: 'all 1.5s cubic-bezier(0.4, 0, 0.2, 1)',
         }}
       >
@@ -74,11 +80,12 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         <h1
           style={{
             color: 'white',
-            fontSize: '3rem',
+            fontSize: animationPhase === 'move' ? '1.5rem' : '3rem',
             fontWeight: 'bold',
             margin: 0,
+            whiteSpace: 'nowrap',
             opacity: animationPhase === 'move' ? 0 : 1,
-            transition: 'opacity 0.5s ease-out',
+            transition: 'all 1.5s cubic-bezier(0.4, 0, 0.2, 1)',
             animation: animationPhase === 'show' ? 'fadeIn 0.8s ease-out 0.3s both' : 'none'
           }}
         >
