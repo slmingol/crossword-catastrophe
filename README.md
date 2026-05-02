@@ -61,6 +61,9 @@ The first time you run it, the scraper will download today's puzzles from all so
 For production deployments using pre-built images from GitHub Container Registry:
 
 ```bash
+# Create data directory for SQLite database
+mkdir -p data
+
 # Use the production compose file
 docker-compose -f docker-compose.prod.yml up -d
 
@@ -74,6 +77,7 @@ The production configuration uses:
 - Production environment settings
 - Auto-restart policies
 - No source code volume mounts
+- Local `./data` directory for SQLite database (easy to backup)
 
 ## 🐳 Using Pre-built Container Images
 
