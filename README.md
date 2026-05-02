@@ -72,6 +72,10 @@ docker-compose -f docker-compose.prod.yml pull
 docker-compose -f docker-compose.prod.yml up -d
 ```
 
+Access the production app:
+- Frontend: http://localhost:9998
+- Backend API: http://localhost:9999
+
 The production configuration uses:
 - Pre-built multi-platform images (amd64/arm64)
 - Production environment settings

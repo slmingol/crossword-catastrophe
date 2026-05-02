@@ -2,7 +2,7 @@ services:
   backend:
     image: ghcr.io/slmingol/crossword-catastrophe-backend:latest
     ports:
-      - "3001:3001"
+      - "9999:3001"
     environment:
       NODE_ENV: production
       PORT: 3001
@@ -23,7 +23,7 @@ services:
   frontend:
     image: ghcr.io/slmingol/crossword-catastrophe-frontend:latest
     ports:
-      - "3000:3000"
+      - "9998:3000"
     environment:
-      VITE_API_URL: http://localhost:3001/api
+      VITE_API_URL: http://localhost:9999/api
     restart: unless-stopped
