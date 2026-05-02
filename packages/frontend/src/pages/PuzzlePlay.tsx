@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api, Puzzle } from '../api/client';
 
@@ -14,6 +14,15 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
   );
   const [focusedCell, setFocusedCell] = useState<{row: number, col: number} | null>(null);
   const [showSolution, setShowSolution] = useState(false);
+  const cellRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  // Auto-focus cell when focusedCell changes
+  useEffect(() => {
+    if (focusedCell) {
+      const key = `${focusedCell.row}-${focusedCell.col}`;
+      cellRefs.current[key]?.focus();
+    }
+  }, [focusedCell]);
 
   console.log('SimpleCrossword state:', { 
     showSolution, 
@@ -138,6 +147,7 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
             return (
               <div
                 key={`${rowIdx}-${colIdx}`}
+                ref={(el) => cellRefs.current[`${rowIdx}-${colIdx}`] = el}
                 tabIndex={cell !== '.' ? 0 : -1}
                 onClick={() => handleCellClick(rowIdx, colIdx)}
                 onKeyDown={(e) => handleKeyDown(e, rowIdx, colIdx)}
