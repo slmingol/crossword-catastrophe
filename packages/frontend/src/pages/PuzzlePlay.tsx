@@ -294,6 +294,7 @@ export default function PuzzlePlay() {
   };
 
   const checkAnswers = useCallback(() => {
+    console.log('checkAnswers called!', { puzzle: !!puzzle, userGrid: userGrid.length, id });
     if (!puzzle) return;
     const solution = puzzle.grid_data?.solution || [];
     let correct = 0, total = 0;
@@ -306,11 +307,14 @@ export default function PuzzlePlay() {
       });
     });
     
+    console.log('Check results:', { correct, total });
+    
     const isComplete = correct === total;
     const currentTimeSpent = timeSpent + Math.floor((Date.now() - startTime) / 1000);
     
     // Save progress with completion status
     api.saveProgress(parseInt(id!), userGrid, isComplete, currentTimeSpent)
+      .then(() => console.log('Progress saved successfully'))
       .catch(err => console.error('Failed to save progress:', err));
     
     if (isComplete) {
@@ -322,10 +326,14 @@ export default function PuzzlePlay() {
 
   // Set actions in nav bar
   useEffect(() => {
+    console.log('Setting actions in nav bar, puzzle:', !!puzzle, 'checkAnswers:', typeof checkAnswers);
     if (puzzle) {
       setActions(
         <>
-          <button onClick={checkAnswers} style={{
+          <button onClick={() => {
+            console.log('Check button clicked!');
+            checkAnswers();
+          }} style={{
             padding: '0.3rem 0.6rem',
             backgroundColor: '#0066cc',
             color: 'white',
