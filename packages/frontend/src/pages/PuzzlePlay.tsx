@@ -145,28 +145,28 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
 
   return (
     <div>
-      <div style={{ marginBottom: '0.5rem', display: 'flex', gap: '0.4rem' }}>
+      <div style={{ marginBottom: '0.5rem', display: 'flex', gap: '0.3rem' }}>
         <button onClick={checkAnswers} style={{
-          padding: '0.35rem 0.7rem',
+          padding: '0.25rem 0.5rem',
           backgroundColor: '#0066cc',
           color: 'white',
           border: 'none',
           borderRadius: '3px',
           cursor: 'pointer',
-          fontSize: '0.85rem'
+          fontSize: '0.75rem'
         }}>
-          Check Answers
+          Check
         </button>
         <button onClick={() => setShowSolution(!showSolution)} style={{
-          padding: '0.35rem 0.7rem',
+          padding: '0.25rem 0.5rem',
           backgroundColor: '#666',
           color: 'white',
           border: 'none',
           borderRadius: '3px',
           cursor: 'pointer',
-          fontSize: '0.85rem'
+          fontSize: '0.75rem'
         }}>
-          {showSolution ? 'Hide' : 'Reveal'} Solution
+          {showSolution ? 'Hide' : 'Show'}
         </button>
       </div>
       
@@ -300,21 +300,14 @@ export default function PuzzlePlay() {
 
   return (
     <div>
-      <div style={{ marginBottom: '0.5rem' }}>
-        <Link to="/" style={{ color: '#0066cc', textDecoration: 'none', fontSize: '0.85rem' }}>← Back</Link>
-      </div>
-      <div style={{
-        backgroundColor: 'white',
-        padding: '0.5rem 0.75rem',
-        borderRadius: '4px',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-        marginBottom: '0.75rem'
-      }}>
-        <h1 style={{ marginBottom: '0.1rem', fontSize: '1.1rem', lineHeight: '1.2', fontWeight: '600' }}>{puzzle.title}</h1>
-        <p style={{ color: '#666', fontSize: '0.75rem', margin: 0, lineHeight: '1.3' }}>
-          By {puzzle.author} • {puzzle.source}
-          {puzzle.difficulty && ` • ${puzzle.difficulty}`} • {new Date(puzzle.date).toLocaleDateString()}
-        </p>
+      <div style={{ marginBottom: '0.3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8f9fa', padding: '0.35rem 0.5rem', borderRadius: '3px', borderLeft: '2px solid #0066cc' }}>
+        <div>
+          <Link to="/" style={{ color: '#0066cc', textDecoration: 'none', fontSize: '0.75rem', marginRight: '0.75rem' }}>← Back</Link>
+          <span style={{ fontSize: '0.85rem', fontWeight: '600' }}>{puzzle.title}</span>
+          <span style={{ color: '#666', fontSize: '0.7rem', marginLeft: '0.5rem' }}>
+            {puzzle.author.replace('By ', '')} • {puzzle.source} • {new Date(puzzle.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}
+          </span>
+        </div>
       </div>
       <div style={{
         backgroundColor: 'white',
