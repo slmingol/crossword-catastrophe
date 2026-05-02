@@ -27,10 +27,55 @@ body {
   margin-bottom: 2rem;
 }
 
+.crossword__grid {
+  display: inline-block;
+  border: 2px solid #121212;
+}
+
+.crossword__cell {
+  position: relative;
+  border: 1px solid #121212;
+  background-color: #fff;
+}
+
+.crossword__cell--blocked {
+  background-color: #121212 !important;
+}
+
+.crossword__cell-number {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  font-size: 0.6em;
+  font-weight: bold;
+}
+
+.crossword__cell-text {
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 1.5em;
+}
+
 .crossword__clues {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
+}
+
+.crossword__clues-list {
+  list-style: none;
+  padding: 0;
+}
+
+.crossword__clue {
+  padding: 0.5rem;
+  cursor: pointer;
+  margin-bottom: 0.25rem;
+}
+
+.crossword__clue--selected {
+  background-color: #ffe500;
 }
 
 @media (max-width: 768px) {
