@@ -15,6 +15,7 @@ RUN npm install --workspace=frontend
 
 # Copy frontend source
 COPY packages/frontend/index.html ./packages/frontend/
+COPY packages/frontend/public ./packages/frontend/public
 COPY packages/frontend/src ./packages/frontend/src
 
 EXPOSE 3000
