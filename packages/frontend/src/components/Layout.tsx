@@ -7,6 +7,15 @@ interface LayoutProps {
   children: ReactNode;
 }
 
+// Theme context
+type Theme = 'light' | 'dark';
+const ThemeContext = createContext<{
+  theme: Theme;
+  toggleTheme: () => void;
+}>({ theme: 'light', toggleTheme: () => {} });
+
+export const useTheme = () => useContext(ThemeContext);
+
 // Context for puzzle page actions
 const PuzzleActionsContext = createContext<{
   setActions: (actions: ReactNode) => void;
@@ -21,6 +30,46 @@ export default function Layout({ children }: LayoutProps) {
   const [actions, setActions] = useState<ReactNode>(null);
   const [navigation, setNavigation] = useState<{ onPrevious?: () => void; onNext?: () => void; hasPrevious: boolean; hasNext: boolean } | null>(null);
   const [showSplash, setShowSplash] = useState(false);
+  const [theme, setTheme] = useState<Theme>(() => {
+    const saved = localStorage.getItem('theme');
+    return (saved === 'dark' || saved === 'light') ? saved : 'light';
+  });
+
+  // Apply theme to document
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
+
+  const colors = theme === 'dark' ? {
+    headerBg: '#1a1a1a',
+    headerText: '#ffffff',
+    headerSecondary: '#cccccc',
+    headerBorder: '#333333',
+    headerLink: '#2a2a2a',
+    headerLinkHover: '#3a3a3a',
+    navDisabled: '#666666',
+    mainBg: '#121212',
+    mainText: '#e0e0e0',
+    footerBg: '#1a1a1a',
+    footerText: '#999999',
+  } : {
+    headerBg: '#1a1a1a',
+    headerText: '#ffffff',
+    headerSecondary: '#cccccc',
+    headerBorder: '#333333',
+    headerLink: '#2a2a2a',
+    headerLinkHover: '#3a3a3a',
+    navDisabled: '#666666',
+    mainBg: '#ffffff',
+    mainText: '#000000',
+    footerBg: '#f0f0f0',
+    footerText: '#666666',
+  };
   
   // Check if splash screen should be shown
   useEffect(() => {
@@ -65,15 +114,16 @@ export default function Layout({ children }: LayoutProps) {
   }, [puzzleId]);
 
   return (
-    <PuzzleActionsContext.Provider value={{ setActions, setNavigation }}>
-      {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <header style={{
-          backgroundColor: '#1a1a1a',
-          color: 'white',
-          padding: '0.75rem 2rem',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      <PuzzleActionsContext.Provider value={{ setActions, setNavigation }}>
+        {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: colors.mainBg, color: colors.mainText, transition: 'background-color 0.3s, color 0.3s' }}>
+          <header style={{
+            backgroundColor: colors.headerBg,
+            color: colors.headerText,
+            padding: '0.75rem 2rem',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+          }}>
           <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
             {/* Top row: Logo and game name centered */}
             <div style={{ 
@@ -82,10 +132,31 @@ export default function Layout({ children }: LayoutProps) {
               justifyContent: 'center',
               gap: '1.5rem',
               paddingBottom: puzzleInfo ? '0.75rem' : '0',
-              borderBottom: puzzleInfo ? '1px solid #333' : 'none',
+              borderBottom: puzzleInfo ? `1px solid ${colors.headerBorder}` : 'none',
               opacity: showSplash ? 0 : 1,
-              transition: 'opacity 0.5s ease-in'
+              transition: 'opacity 0.5s ease-in',
+              position: 'relative'
             }}>
+              <button
+                onClick={toggleTheme}
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  background: 'none',
+                  border: 'none',
+                  color: colors.headerText,
+                  fontSize: '1.3rem',
+                  cursor: 'pointer',
+                  padding: '0.5rem',
+                  borderRadius: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+              >
+                {theme === 'light' ? '🌙' : '☀️'}
+              </button>
               <Link to="/" style={{ 
                 color: 'white', 
                 textDecoration: 'none', 
@@ -97,12 +168,12 @@ export default function Layout({ children }: LayoutProps) {
                 <span style={{ fontSize: '1.5rem', fontWeight: 'bold', whiteSpace: 'nowrap' }}>Crossword Cat-a-strophe</span>
               </Link>
               <Link to="/archive" style={{ 
-                color: '#ccc', 
+                color: colors.headerSecondary, 
                 textDecoration: 'none', 
                 fontSize: '0.95rem',
                 padding: '0.4rem 0.8rem',
                 borderRadius: '4px',
-                backgroundColor: '#2a2a2a',
+                backgroundColor: colors.headerLink,
                 transition: 'background-color 0.15s'
               }}>
                 Archive
@@ -126,7 +197,7 @@ export default function Layout({ children }: LayoutProps) {
                       style={{
                         background: 'none',
                         border: 'none',
-                        color: navigation.hasPrevious ? 'white' : '#666',
+                        color: navigation.hasPrevious ? colors.headerText : colors.navDisabled,
                         fontSize: '1.2rem',
                         cursor: navigation.hasPrevious ? 'pointer' : 'not-allowed',
                         padding: '0 0.15rem',
@@ -145,7 +216,7 @@ export default function Layout({ children }: LayoutProps) {
                       style={{
                         background: 'none',
                         border: 'none',
-                        color: navigation.hasNext ? 'white' : '#666',
+                        color: navigation.hasNext ? colors.headerText : colors.navDisabled,
                         fontSize: '1.2rem',
                         cursor: navigation.hasNext ? 'pointer' : 'not-allowed',
                         padding: '0 0.15rem',
@@ -156,7 +227,7 @@ export default function Layout({ children }: LayoutProps) {
                       →
                     </button>
                   )}
-                  <span style={{ color: '#ccc', fontSize: '0.85rem', whiteSpace: 'nowrap', marginLeft: '0.5rem' }}>
+                  <span style={{ color: colors.headerSecondary, fontSize: '0.85rem', whiteSpace: 'nowrap', marginLeft: '0.5rem' }}>
                     {puzzleInfo.author.replace('By ', '')} • {puzzleInfo.source} • {new Date(puzzleInfo.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}
                   </span>
                 </div>
@@ -169,14 +240,16 @@ export default function Layout({ children }: LayoutProps) {
           {children}
         </main>
         <footer style={{
-          backgroundColor: '#f0f0f0',
+          backgroundColor: colors.footerBg,
           padding: '1rem',
           textAlign: 'center',
-          color: '#666'
+          color: colors.footerText,
+          transition: 'background-color 0.3s, color 0.3s'
         }}>
           <p>Self-hosted Crossword Archive</p>
         </footer>
       </div>
     </PuzzleActionsContext.Provider>
+    </ThemeContext.Provider>
   );
 }
