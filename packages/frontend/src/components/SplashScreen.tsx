@@ -62,7 +62,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
             : 'translate(-50%, -50%)',
           zIndex: 10000,
           display: 'flex',
-          flexDirection: 'row',
+          flexDirection: animationPhase === 'move' ? 'row' : 'column',
           alignItems: 'center',
           gap: animationPhase === 'move' ? '0.75rem' : '2rem',
           transition: 'all 1.5s cubic-bezier(0.4, 0, 0.2, 1)',
