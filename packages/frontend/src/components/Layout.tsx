@@ -177,7 +177,7 @@ export default function Layout({ children }: LayoutProps) {
               }}>
                 <img src="/logo.png" alt="Crossword Cat-a-strophe Logo" style={{ height: window.innerWidth < 768 ? '2rem' : '3.5rem', width: 'auto', flexShrink: 0 }} />
                 <span style={{ fontSize: window.innerWidth < 768 ? '1rem' : '1.5rem', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {window.innerWidth < 480 ? 'Crossword' : 'Crossword Cat-a-strophe'}
+                  {window.innerWidth < 768 ? 'Cat-a-strophe' : 'Crossword Cat-a-strophe'}
                 </span>
               </Link>
               <Link to="/archive" style={{ 

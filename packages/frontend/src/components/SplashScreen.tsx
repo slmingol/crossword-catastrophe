@@ -109,7 +109,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
             animation: animationPhase === 'show' ? 'fadeIn 0.8s ease-out 0.3s both' : 'none'
           }}
         >
-          {isMobile ? 'Cat-a-strophe' : 'Crossword Cat-a-strophe'}
+          Crossword Cat-a-strophe
         </h1>
       </div>
       
