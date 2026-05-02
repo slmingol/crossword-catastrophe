@@ -129,8 +129,8 @@ export default function Layout({ children }: LayoutProps) {
             <div style={{ 
               display: 'flex', 
               alignItems: 'center', 
-              justifyContent: 'center',
-              gap: '1.5rem',
+              justifyContent: 'space-between',
+              gap: window.innerWidth < 768 ? '0.5rem' : '1.5rem',
               paddingBottom: puzzleInfo ? '0.75rem' : '0',
               borderBottom: puzzleInfo ? `1px solid ${colors.headerBorder}` : 'none',
               opacity: showSplash ? 0 : 1,
@@ -140,18 +140,17 @@ export default function Layout({ children }: LayoutProps) {
               <button
                 onClick={toggleTheme}
                 style={{
-                  position: 'absolute',
-                  left: 0,
                   background: 'none',
                   border: 'none',
                   color: colors.headerText,
-                  fontSize: '1.3rem',
+                  fontSize: window.innerWidth < 768 ? '1.1rem' : '1.3rem',
                   cursor: 'pointer',
-                  padding: '0.5rem',
+                  padding: window.innerWidth < 768 ? '0.25rem' : '0.5rem',
                   borderRadius: '4px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  flexShrink: 0
                 }}
                 title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
               >
@@ -162,19 +161,27 @@ export default function Layout({ children }: LayoutProps) {
                 textDecoration: 'none', 
                 display: 'flex', 
                 alignItems: 'center', 
-                gap: '0.75rem'
+                gap: window.innerWidth < 768 ? '0.35rem' : '0.75rem',
+                flex: 1,
+                justifyContent: 'center',
+                overflow: 'hidden',
+                minWidth: 0
               }}>
-                <img src="/logo.png" alt="Crossword Cat-a-strophe Logo" style={{ height: '3.5rem', width: 'auto' }} />
-                <span style={{ fontSize: '1.5rem', fontWeight: 'bold', whiteSpace: 'nowrap' }}>Crossword Cat-a-strophe</span>
+                <img src="/logo.png" alt="Crossword Cat-a-strophe Logo" style={{ height: window.innerWidth < 768 ? '2rem' : '3.5rem', width: 'auto', flexShrink: 0 }} />
+                <span style={{ fontSize: window.innerWidth < 768 ? '1rem' : '1.5rem', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {window.innerWidth < 480 ? 'Crossword' : 'Crossword Cat-a-strophe'}
+                </span>
               </Link>
               <Link to="/archive" style={{ 
                 color: colors.headerSecondary, 
                 textDecoration: 'none', 
-                fontSize: '0.95rem',
-                padding: '0.4rem 0.8rem',
+                fontSize: window.innerWidth < 768 ? '0.8rem' : '0.95rem',
+                padding: window.innerWidth < 768 ? '0.3rem 0.5rem' : '0.4rem 0.8rem',
                 borderRadius: '4px',
                 backgroundColor: colors.headerLink,
-                transition: 'background-color 0.15s'
+                transition: 'background-color 0.15s',
+                flexShrink: 0,
+                whiteSpace: 'nowrap'
               }}>
                 Archive
               </Link>
@@ -184,12 +191,13 @@ export default function Layout({ children }: LayoutProps) {
             {puzzleInfo && (
               <nav style={{ 
                 display: 'flex', 
-                gap: '1rem', 
+                gap: window.innerWidth < 768 ? '0.5rem' : '1rem', 
                 alignItems: 'center', 
                 justifyContent: 'space-between',
-                paddingTop: '0.75rem'
+                paddingTop: window.innerWidth < 768 ? '0.5rem' : '0.75rem',
+                flexWrap: window.innerWidth < 768 ? 'wrap' : 'nowrap'
               }}>
-                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flex: 1 }}>
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flex: 1, minWidth: 0, overflow: 'hidden' }}>
                   {navigation && (
                     <button
                       onClick={navigation.onPrevious}
@@ -201,14 +209,15 @@ export default function Layout({ children }: LayoutProps) {
                         fontSize: '1.2rem',
                         cursor: navigation.hasPrevious ? 'pointer' : 'not-allowed',
                         padding: '0 0.15rem',
-                        opacity: navigation.hasPrevious ? 1 : 0.5
+                        opacity: navigation.hasPrevious ? 1 : 0.5,
+                        flexShrink: 0
                       }}
                       title="Previous puzzle"
                     >
                       ←
                     </button>
                   )}
-                  <span style={{ fontSize: '0.95rem', fontWeight: '600', whiteSpace: 'nowrap' }}>{puzzleInfo.title}</span>
+                  <span style={{ fontSize: window.innerWidth < 768 ? '0.85rem' : '0.95rem', fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>{puzzleInfo.title}</span>
                   {navigation && (
                     <button
                       onClick={navigation.onNext}
@@ -220,16 +229,19 @@ export default function Layout({ children }: LayoutProps) {
                         fontSize: '1.2rem',
                         cursor: navigation.hasNext ? 'pointer' : 'not-allowed',
                         padding: '0 0.15rem',
-                        opacity: navigation.hasNext ? 1 : 0.5
+                        opacity: navigation.hasNext ? 1 : 0.5,
+                        flexShrink: 0
                       }}
                       title="Next puzzle"
                     >
                       →
                     </button>
                   )}
-                  <span style={{ color: colors.headerSecondary, fontSize: '0.85rem', whiteSpace: 'nowrap', marginLeft: '0.5rem' }}>
-                    {puzzleInfo.author.replace('By ', '')} • {puzzleInfo.source} • {new Date(puzzleInfo.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}
-                  </span>
+                  {window.innerWidth >= 768 && (
+                    <span style={{ color: colors.headerSecondary, fontSize: '0.85rem', whiteSpace: 'nowrap', marginLeft: '0.5rem' }}>
+                      {puzzleInfo.author.replace('By ', '')} • {puzzleInfo.source} • {new Date(puzzleInfo.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}
+                    </span>
+                  )}
                 </div>
                 {actions && <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0 }}>{actions}</div>}
               </nav>
