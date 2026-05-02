@@ -50,7 +50,6 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid }: {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, rowIdx: number, colIdx: number) => {
-    console.log('handleKeyDown called:', { key: e.key, row: rowIdx, col: colIdx });
     if (solution[rowIdx][colIdx] === '.') return;
 
     if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
@@ -62,17 +61,14 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid }: {
       // Move to next cell
       let nextCol = colIdx + 1;
       while (nextCol < width && solution[rowIdx][nextCol] === '.') nextCol++;
-      console.log('Moving to next cell:', { nextCol, width });
       if (nextCol < width) {
         setTimeout(() => {
           const nextKey = `${rowIdx}-${nextCol}`;
-          console.log('Focusing cell:', nextKey, 'ref exists:', !!cellRefs.current[nextKey]);
           cellRefs.current[nextKey]?.focus();
         }, 0);
       }
     } else if (e.key === 'Backspace') {
       e.preventDefault();
-      console.log('Backspace pressed at', rowIdx, colIdx);
       const newGrid = userGrid.map(row => [...row]);
       
       // Delete current cell
@@ -82,11 +78,9 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid }: {
       // Move to previous cell
       let prevCol = colIdx - 1;
       while (prevCol >= 0 && solution[rowIdx][prevCol] === '.') prevCol--;
-      console.log('Moving to previous cell:', prevCol);
       if (prevCol >= 0) {
         setTimeout(() => {
           const prevKey = `${rowIdx}-${prevCol}`;
-          console.log('Focusing prev cell:', prevKey, 'ref exists:', !!cellRefs.current[prevKey]);
           cellRefs.current[prevKey]?.focus();
         }, 0);
       }
@@ -296,14 +290,22 @@ export default function PuzzlePlay() {
   const [hasPrevious, setHasPrevious] = useState(false);
   const [hasNext, setHasNext] = useState(false);
   const { setActions, setNavigation } = usePuzzleActions();
-
-  console.log('PuzzlePlay render:', { id, loading, hasPuzzle: !!puzzle });
+  
+  // Use refs to avoid recreating callbacks on every keystroke
+  const userGridRef = useRef<string[][]>([]);
+  const timeSpentRef = useRef(0);
+  
+  useEffect(() => {
+    userGridRef.current = userGrid;
+  }, [userGrid]);
+  
+  useEffect(() => {
+    timeSpentRef.current = timeSpent;
+  }, [timeSpent]);
 
   // Load puzzle and saved progress
   useEffect(() => {
-    console.log('PuzzlePlay useEffect triggered, id:', id);
     if (id) {
-      console.log('Fetching puzzle', id);
       Promise.all([
         api.getPuzzle(parseInt(id)),
         api.getPuzzleProgress(parseInt(id)),
@@ -311,8 +313,6 @@ export default function PuzzlePlay() {
         api.getNextPuzzle(parseInt(id))
       ])
         .then(([puzzleData, progress, prev, next]) => {
-          console.log('Puzzle fetched successfully:', puzzleData);
-          console.log('Progress loaded:', progress);
           setPuzzle(puzzleData);
           setHasPrevious(!!prev);
           setHasNext(!!next);
@@ -339,54 +339,46 @@ export default function PuzzlePlay() {
     if (!puzzle || !id) return;
 
     const interval = setInterval(() => {
-      const currentTimeSpent = timeSpent + Math.floor((Date.now() - startTime) / 1000);
+      const currentTimeSpent = timeSpentRef.current + Math.floor((Date.now() - startTime) / 1000);
       setTimeSpent(currentTimeSpent);
       
-      const isComplete = checkIfComplete();
-      api.saveProgress(parseInt(id), userGrid, isComplete, currentTimeSpent)
-        .then(() => console.log('Progress auto-saved'))
+      // Check if complete using current ref value
+      const solution = puzzle.grid_data?.solution || [];
+      let allCorrect = true;
+      solution.forEach((row, r) => {
+        row.forEach((cell, c) => {
+          if (cell !== '.' && userGridRef.current[r]?.[c] !== cell) {
+            allCorrect = false;
+          }
+        });
+      });
+      
+      api.saveProgress(parseInt(id), userGridRef.current, allCorrect, currentTimeSpent)
         .catch(err => console.error('Failed to save progress:', err));
     }, 30000); // 30 seconds
 
     return () => clearInterval(interval);
-  }, [puzzle, id, userGrid, startTime, timeSpent]);
-
-  const checkIfComplete = () => {
-    if (!puzzle) return false;
-    const solution = puzzle.grid_data?.solution || [];
-    let allCorrect = true;
-    solution.forEach((row, r) => {
-      row.forEach((cell, c) => {
-        if (cell !== '.' && userGrid[r]?.[c] !== cell) {
-          allCorrect = false;
-        }
-      });
-    });
-    return allCorrect;
-  };
+  }, [puzzle, id, startTime]);
 
   const checkAnswers = useCallback(() => {
-    console.log('checkAnswers called!', { puzzle: !!puzzle, userGrid: userGrid.length, id });
-    if (!puzzle) return;
+    if (!puzzle || !id) return;
     const solution = puzzle.grid_data?.solution || [];
     let correct = 0, total = 0;
+    const currentGrid = userGridRef.current;
     solution.forEach((row, r) => {
       row.forEach((cell, c) => {
         if (cell !== '.') {
           total++;
-          if (userGrid[r]?.[c] === cell) correct++;
+          if (currentGrid[r]?.[c] === cell) correct++;
         }
       });
     });
     
-    console.log('Check results:', { correct, total });
-    
     const isComplete = correct === total;
-    const currentTimeSpent = timeSpent + Math.floor((Date.now() - startTime) / 1000);
+    const currentTimeSpent = timeSpentRef.current + Math.floor((Date.now() - startTime) / 1000);
     
     // Save progress with completion status
-    api.saveProgress(parseInt(id!), userGrid, isComplete, currentTimeSpent)
-      .then(() => console.log('Progress saved successfully'))
+    api.saveProgress(parseInt(id), currentGrid, isComplete, currentTimeSpent)
       .catch(err => console.error('Failed to save progress:', err));
     
     if (isComplete) {
@@ -403,7 +395,7 @@ export default function PuzzlePlay() {
     
     // Auto-hide notification after 5 seconds
     setTimeout(() => setNotification(null), 5000);
-  }, [puzzle, userGrid, timeSpent, startTime, id]);
+  }, [puzzle, id, startTime]);
 
   const handlePrevious = useCallback(async () => {
     if (!id) return;
@@ -423,14 +415,10 @@ export default function PuzzlePlay() {
 
   // Set actions in nav bar
   useEffect(() => {
-    console.log('Setting actions in nav bar, puzzle:', !!puzzle, 'checkAnswers:', typeof checkAnswers);
     if (puzzle) {
       setActions(
         <>
-          <button onClick={() => {
-            console.log('Check button clicked!');
-            checkAnswers();
-          }} style={{
+          <button onClick={checkAnswers} style={{
             padding: '0.3rem 0.6rem',
             backgroundColor: '#0066cc',
             color: 'white',
