@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { api, Puzzle } from '../api/client';
 import { usePuzzleActions } from '../components/Layout';
 
-// Interactive crossword display - v6 nav integration
+// Interactive crossword display - v7 buttons in top nav
 function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid }: { 
   puzzle: Puzzle, 
   showSolution: boolean,
