@@ -127,12 +127,16 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid }: {
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
+      <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
         <div style={{ 
-          display: 'inline-grid',
+          display: 'grid',
           gridTemplateColumns: `repeat(${width}, 34px)`,
+          gridTemplateRows: `repeat(${height}, 34px)`,
           gap: 0,
-          border: '2px solid #000'
+          border: '2px solid #000',
+          width: `${width * 34 + 4}px`, // Explicit width: cells + border
+          height: `${height * 34 + 4}px`, // Explicit height: cells + border
+          flexShrink: 0
         }}>
         {solution.map((row: string[], rowIdx: number) => 
           row.map((cell: string, colIdx: number) => {
