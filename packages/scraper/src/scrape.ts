@@ -10,8 +10,9 @@ const execAsync = promisify(exec);
 const PUZZLE_SOURCES = [
   { name: 'usa', display: 'USA Today' },
   { name: 'uni', display: 'Universal Crossword' },
-  { name: 'lat', display: 'Los Angeles Times' },
-  { name: 'nd', display: 'Newsday' },
+  // Temporarily disabled - xword-dl can't parse these sites anymore (as of May 2026)
+  // { name: 'lat', display: 'Los Angeles Times' },
+  // { name: 'nd', display: 'Newsday' },
 ];
 
 export async function scrapePuzzles() {
