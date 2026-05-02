@@ -46,8 +46,9 @@ export default function Archive() {
 
   useEffect(() => {
     setLoading(true);
+    const sourcesArray = Array.from(selectedSources);
     Promise.all([
-      api.getPuzzles(page),
+      api.getPuzzles(page, 20, sourcesArray.length === Object.keys(SOURCE_CONFIG).length ? undefined : sourcesArray),
       api.getUserProgress()
     ])
       .then(([puzzlesData, progressData]) => {
@@ -57,7 +58,7 @@ export default function Archive() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [page]);
+  }, [page, selectedSources]);
 
   const toggleSource = (source: string) => {
     setSelectedSources(prev => {
@@ -69,9 +70,8 @@ export default function Archive() {
       }
       return next;
     });
+    setPage(1); // Reset to first page when filter changes
   };
-
-  const filteredPuzzles = data?.puzzles.filter(p => selectedSources.has(p.source)) || [];
 
   if (loading && !data) {
     return <div style={{ textAlign: 'center', padding: '4rem' }}>Loading archive...</div>;
@@ -122,14 +122,14 @@ export default function Archive() {
           );
         })}
         <span style={{ marginLeft: 'auto', color: '#666', fontSize: '0.8rem' }}>
-          {filteredPuzzles.length} of {data?.puzzles.length || 0}
+          {data?.pagination.total || 0} puzzles
         </span>
       </div>
       
-      {data && filteredPuzzles.length > 0 ? (
+      {data && data.puzzles.length > 0 ? (
         <>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            {filteredPuzzles.map((puzzle: Puzzle) => {
+            {data.puzzles.map((puzzle: Puzzle) => {
               const puzzleProgress = progress.get(puzzle.id);
               const isCompleted = puzzleProgress?.completed || false;
               const inProgress = puzzleProgress && !puzzleProgress.completed;
@@ -214,13 +214,11 @@ export default function Archive() {
             </button>
           </div>
         </>
-      ) : data && data.puzzles.length > 0 ? (
-        <div style={{ textAlign: 'center', padding: '4rem', color: '#666' }}>
-          No puzzles match the selected filters. Try selecting more sources.
-        </div>
       ) : (
         <div style={{ textAlign: 'center', padding: '4rem', color: '#666' }}>
-          No puzzles in archive yet. The scraper will download puzzles daily.
+          {selectedSources.size === 0 
+            ? 'Select at least one source to view puzzles.' 
+            : 'No puzzles found. Try selecting different sources or check back later.'}
         </div>
       )}
     </div>

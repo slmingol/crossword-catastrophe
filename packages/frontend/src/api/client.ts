@@ -37,8 +37,12 @@ export interface UserProgress {
 }
 
 export const api = {
-  async getPuzzles(page = 1, limit = 20): Promise<PuzzleListResponse> {
-    const response = await fetch(`${API_URL}/puzzles?page=${page}&limit=${limit}`);
+  async getPuzzles(page = 1, limit = 20, sources?: string[]): Promise<PuzzleListResponse> {
+    let url = `${API_URL}/puzzles?page=${page}&limit=${limit}`;
+    if (sources && sources.length > 0) {
+      url += `&sources=${sources.join(',')}`;
+    }
+    const response = await fetch(url);
     if (!response.ok) throw new Error('Failed to fetch puzzles');
     return response.json();
   },

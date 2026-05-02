@@ -9,16 +9,28 @@ puzzleRouter.get('/', async (req, res) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
     const offset = (page - 1) * limit;
+    const sources = req.query.sources as string | undefined;
 
-    const result = await db.query(
-      `SELECT id, title, author, source, date, difficulty, created_at
-       FROM puzzles
-       ORDER BY date DESC
-       LIMIT $1 OFFSET $2`,
-      [limit, offset]
-    );
+    let query = `SELECT id, title, author, source, date, difficulty, created_at
+       FROM puzzles`;
+    let countQuery = 'SELECT COUNT(*) FROM puzzles';
+    const queryParams: any[] = [];
+    const countParams: any[] = [];
 
-    const countResult = await db.query('SELECT COUNT(*) FROM puzzles');
+    // Add source filter if provided
+    if (sources) {
+      const sourceArray = sources.split(',');
+      query += ` WHERE source = ANY($1)`;
+      countQuery += ` WHERE source = ANY($1)`;
+      queryParams.push(sourceArray);
+      countParams.push(sourceArray);
+    }
+
+    query += ` ORDER BY date DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
+    queryParams.push(limit, offset);
+
+    const result = await db.query(query, queryParams);
+    const countResult = await db.query(countQuery, countParams);
     const total = parseInt(countResult.rows[0].count);
 
     res.json({
