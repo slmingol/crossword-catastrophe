@@ -20,3 +20,4 @@ data/*
 coverage/
 .vscode/
 .idea/
+xword-dl/
