@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api, Puzzle, PuzzleListResponse, UserProgress } from '../api/client';
 import { format } from 'date-fns';
+import { useTheme } from '../components/Layout';
 
 // Source badge colors and abbreviations
 const SOURCE_CONFIG: Record<string, { abbr: string; color: string; bg: string; description: string }> = {
@@ -11,8 +12,13 @@ const SOURCE_CONFIG: Record<string, { abbr: string; color: string; bg: string; d
   'Newsday': { abbr: 'ND', color: '#ff5630', bg: '#ffebe6', description: 'Newsday crossword puzzles' },
 };
 
-function SourceBadge({ source }: { source: string }) {
+function SourceBadge({ source, theme }: { source: string; theme: 'light' | 'dark' }) {
   const config = SOURCE_CONFIG[source] || { abbr: source.slice(0, 3).toUpperCase(), color: '#666', bg: '#f0f0f0' };
+  
+  // Adjust backgrounds for dark mode
+  const badgeBg = theme === 'dark' 
+    ? config.color + '33' // Add transparency
+    : config.bg;
   
   return (
     <span
@@ -22,7 +28,7 @@ function SourceBadge({ source }: { source: string }) {
         fontWeight: '700',
         padding: '0.2rem 0.4rem',
         borderRadius: '3px',
-        backgroundColor: config.bg,
+        backgroundColor: badgeBg,
         color: config.color,
         marginRight: '0.75rem',
         minWidth: '36px',
@@ -36,6 +42,7 @@ function SourceBadge({ source }: { source: string }) {
 }
 
 export default function Archive() {
+  const { theme } = useTheme();
   const [data, setData] = useState<PuzzleListResponse | null>(null);
   const [progress, setProgress] = useState<Map<number, UserProgress>>(new Map());
   const [loading, setLoading] = useState(true);
@@ -43,6 +50,37 @@ export default function Archive() {
   const [selectedSources, setSelectedSources] = useState<Set<string>>(
     new Set(Object.keys(SOURCE_CONFIG))
   );
+
+  // Theme colors
+  const colors = theme === 'dark' ? {
+    filterBg: '#2a2a2a',
+    filterText: '#b0b0b0',
+    clearButton: '#3a3a3a',
+    clearButtonHover: '#4a4a4a',
+    clearButtonBorder: '#555',
+    sourceButtonBg: '#2a2a2a',
+    sourceButtonBorder: '#555',
+    cardBg: '#2a2a2a',
+    cardBorder: '#444',
+    cardHover: '#3a3a3a',
+    text: '#e0e0e0',
+    secondaryText: '#b0b0b0',
+    paginationDisabled: '#444',
+  } : {
+    filterBg: '#f8f9fa',
+    filterText: '#666',
+    clearButton: 'white',
+    clearButtonHover: '#f5f5f5',
+    clearButtonBorder: '#ddd',
+    sourceButtonBg: 'white',
+    sourceButtonBorder: '#ddd',
+    cardBg: 'white',
+    cardBorder: '#e0e0e0',
+    cardHover: '#f5f5f5',
+    text: 'inherit',
+    secondaryText: '#666',
+    paginationDisabled: '#ccc',
+  };
 
   useEffect(() => {
     // If no sources selected, show empty state immediately
@@ -92,7 +130,7 @@ export default function Archive() {
       <div style={{ 
         marginBottom: '1.5rem', 
         padding: '0.75rem 1rem', 
-        backgroundColor: '#f8f9fa',
+        backgroundColor: colors.filterBg,
         borderRadius: '4px',
         fontSize: '0.85rem',
         display: 'flex',
@@ -100,7 +138,7 @@ export default function Archive() {
         flexWrap: 'wrap',
         gap: '0.75rem'
       }}>
-        <span style={{ fontWeight: '600', color: '#666', marginRight: '0.5rem' }}>Filter:</span>
+        <span style={{ fontWeight: '600', color: colors.filterText, marginRight: '0.5rem' }}>Filter:</span>
         <button
           onClick={() => {
             setSelectedSources(new Set());
@@ -108,12 +146,12 @@ export default function Archive() {
           }}
           style={{
             padding: '0.3rem 0.6rem',
-            border: '1px solid #ddd',
+            border: `1px solid ${colors.clearButtonBorder}`,
             borderRadius: '4px',
-            backgroundColor: 'white',
+            backgroundColor: colors.clearButton,
             cursor: 'pointer',
             fontSize: '0.7rem',
-            color: '#666',
+            color: colors.filterText,
             transition: 'all 0.15s'
           }}
         >
@@ -130,9 +168,9 @@ export default function Archive() {
                 flexDirection: 'column',
                 alignItems: 'center',
                 padding: '0.4rem 0.6rem',
-                border: `2px solid ${isSelected ? config.color : '#ddd'}`,
+                border: `2px solid ${isSelected ? config.color : colors.sourceButtonBorder}`,
                 borderRadius: '6px',
-                backgroundColor: isSelected ? config.bg : 'white',
+                backgroundColor: isSelected ? config.bg : colors.sourceButtonBg,
                 cursor: 'pointer',
                 transition: 'all 0.15s',
                 opacity: isSelected ? 1 : 0.5,
@@ -149,7 +187,7 @@ export default function Archive() {
               </span>
               <span style={{
                 fontSize: '0.65rem',
-                color: '#666',
+                color: colors.secondaryText,
                 textAlign: 'center',
                 lineHeight: '1.2'
               }}>
@@ -158,7 +196,7 @@ export default function Archive() {
             </button>
           );
         })}
-        <span style={{ marginLeft: 'auto', color: '#666', fontSize: '0.8rem' }}>
+        <span style={{ marginLeft: 'auto', color: colors.filterText, fontSize: '0.8rem' }}>
           {data?.pagination.total || 0} puzzles
         </span>
       </div>
@@ -167,13 +205,13 @@ export default function Archive() {
       <div style={{
         marginBottom: '1.5rem',
         padding: '0.5rem 1rem',
-        backgroundColor: '#f8f9fa',
+        backgroundColor: colors.filterBg,
         borderRadius: '4px',
         fontSize: '0.8rem',
         display: 'flex',
         alignItems: 'center',
         gap: '1.5rem',
-        color: '#666'
+        color: colors.filterText
       }}>
         <span style={{ fontWeight: '600' }}>Progress indicators:</span>
         <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -201,32 +239,32 @@ export default function Archive() {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    backgroundColor: 'white',
+                    backgroundColor: colors.cardBg,
                     padding: '0.5rem 0.75rem',
                     borderRadius: '4px',
-                    border: '1px solid #e0e0e0',
+                    border: `1px solid ${colors.cardBorder}`,
                     textDecoration: 'none',
-                    color: 'inherit',
+                    color: colors.text,
                     fontSize: '0.9rem',
                     transition: 'background-color 0.15s'
                   }}
                   onMouseOver={(e) => {
-                    e.currentTarget.style.backgroundColor = '#f5f5f5';
+                    e.currentTarget.style.backgroundColor = colors.cardHover;
                   }}
                   onMouseOut={(e) => {
-                    e.currentTarget.style.backgroundColor = 'white';
+                    e.currentTarget.style.backgroundColor = colors.cardBg;
                   }}
                 >
                   <span style={{ fontWeight: '600', marginRight: '1rem', minWidth: '80px' }}>
                     {format(new Date(puzzle.date), 'M/d/yy')}
                   </span>
-                  <SourceBadge source={puzzle.source} />
+                  <SourceBadge source={puzzle.source} theme={theme} />
                   {isCompleted && <span style={{ marginRight: '0.5rem', color: '#28a745', fontSize: '1rem' }}>✓</span>}
                   {inProgress && <span style={{ marginRight: '0.5rem', color: '#ffc107', fontSize: '0.8rem' }}>●</span>}
                   <span style={{ fontWeight: '500', marginRight: '1rem', flex: '0 0 auto' }}>
                     {puzzle.title}
                   </span>
-                  <span style={{ color: '#666', fontSize: '0.85rem' }}>
+                  <span style={{ color: colors.secondaryText, fontSize: '0.85rem' }}>
                     {puzzle.author.replace('By ', '')}
                     {puzzle.difficulty && ` • ${puzzle.difficulty}`}
                   </span>
@@ -246,7 +284,7 @@ export default function Archive() {
               disabled={page === 1}
               style={{
                 padding: '0.5rem 1rem',
-                backgroundColor: page === 1 ? '#ccc' : '#0066cc',
+                backgroundColor: page === 1 ? colors.paginationDisabled : '#0066cc',
                 color: 'white',
                 border: 'none',
                 borderRadius: '4px',
@@ -255,7 +293,7 @@ export default function Archive() {
             >
               Previous
             </button>
-            <span style={{ color: '#666' }}>
+            <span style={{ color: colors.filterText }}>
               Page {page} of {data.pagination.pages}
             </span>
             <button
@@ -263,7 +301,7 @@ export default function Archive() {
               disabled={page >= data.pagination.pages}
               style={{
                 padding: '0.5rem 1rem',
-                backgroundColor: page >= data.pagination.pages ? '#ccc' : '#0066cc',
+                backgroundColor: page >= data.pagination.pages ? colors.paginationDisabled : '#0066cc',
                 color: 'white',
                 border: 'none',
                 borderRadius: '4px',
@@ -275,7 +313,7 @@ export default function Archive() {
           </div>
         </>
       ) : (
-        <div style={{ textAlign: 'center', padding: '4rem', color: '#666' }}>
+        <div style={{ textAlign: 'center', padding: '4rem', color: colors.secondaryText }}>
           {selectedSources.size === 0 
             ? 'Select at least one source to view puzzles.' 
             : 'No puzzles found. Try selecting different sources or check back later.'}
