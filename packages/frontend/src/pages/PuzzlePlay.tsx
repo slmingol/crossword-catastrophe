@@ -55,6 +55,7 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, rowIdx: number, colIdx: number) => {
+    console.log('handleKeyDown called:', { key: e.key, row: rowIdx, col: colIdx });
     if (solution[rowIdx][colIdx] === '.') return;
 
     if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
@@ -66,9 +67,11 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
       // Move to next cell
       let nextCol = colIdx + 1;
       while (nextCol < width && solution[rowIdx][nextCol] === '.') nextCol++;
+      console.log('Moving to next cell:', { nextCol, width });
       if (nextCol < width) {
         setTimeout(() => {
           const nextKey = `${rowIdx}-${nextCol}`;
+          console.log('Focusing cell:', nextKey, 'ref exists:', !!cellRefs.current[nextKey]);
           cellRefs.current[nextKey]?.focus();
         }, 0);
       }
@@ -148,13 +151,14 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
           {showSolution ? 'Hide' : 'Reveal'} Solution
         </button>
       </div>
-      <div style={{ 
-        display: 'inline-grid',
-        gridTemplateColumns: `repeat(${width}, 40px)`,
-        gap: 0,
-        border: '2px solid #000',
-        marginBottom: '2rem'
-      }}>
+      
+      <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
+        <div style={{ 
+          display: 'inline-grid',
+          gridTemplateColumns: `repeat(${width}, 40px)`,
+          gap: 0,
+          border: '2px solid #000'
+        }}>
         {solution.map((row: string[], rowIdx: number) => 
           row.map((cell: string, colIdx: number) => {
             const isFocused = focusedCell?.row === rowIdx && focusedCell?.col === colIdx;
@@ -211,10 +215,10 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
         )}
       </div>
       
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-        <div>
-          <h3>Across</h3>
-          <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
+      <div style={{ flex: 1, minWidth: '300px' }}>
+        <div style={{ marginBottom: '2rem' }}>
+          <h3 style={{ marginBottom: '1rem' }}>Across</h3>
+          <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
             {Object.entries(puzzle.clues_across || {}).map(([num, clue]: [string, any]) => (
               <div key={num} style={{ marginBottom: '0.75rem', padding: '0.5rem', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
                 <strong>{num}.</strong> {typeof clue === 'string' ? clue : clue.clue}
@@ -223,8 +227,8 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
           </div>
         </div>
         <div>
-          <h3>Down</h3>
-          <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
+          <h3 style={{ marginBottom: '1rem' }}>Down</h3>
+          <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
             {Object.entries(puzzle.clues_down || {}).map(([num, clue]: [string, any]) => (
               <div key={num} style={{ marginBottom: '0.75rem', padding: '0.5rem', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
                 <strong>{num}.</strong> {typeof clue === 'string' ? clue : clue.clue}
@@ -233,6 +237,8 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
           </div>
         </div>
       </div>
+      
+    </div>
     </div>
   );
 }
