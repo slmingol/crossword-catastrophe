@@ -33,6 +33,34 @@ export default function PuzzlePlay() {
     return <div style={{ textAlign: 'center', padding: '4rem' }}>Puzzle not found</div>;
   }
 
+  // Calculate clue positions from grid
+  const calculatePositions = () => {
+    const solution = puzzle.grid_data?.solution || [];
+    const width = puzzle.grid_data?.width || 15;
+    const height = puzzle.grid_data?.height || 15;
+    const positions: Record<number, { x: number; y: number }> = {};
+    
+    let clueNum = 1;
+    for (let row = 0; row < height; row++) {
+      for (let col = 0; col < width; col++) {
+        if (!solution[row] || solution[row][col] === '.') continue;
+        
+        const hasAcross = (col === 0 || solution[row][col - 1] === '.') && 
+                         col < width - 1 && solution[row][col + 1] !== '.';
+        const hasDown = (row === 0 || solution[row - 1][col] === '.') && 
+                       row < height - 1 && solution[row + 1][col] !== '.';
+        
+        if (hasAcross || hasDown) {
+          positions[clueNum] = { x: col, y: row };
+          clueNum++;
+        }
+      }
+    }
+    return positions;
+  };
+
+  const positions = calculatePositions();
+
   // Transform puzzle data to Guardian crossword format
   const crosswordData = {
     id: puzzle.id.toString(),
@@ -41,30 +69,38 @@ export default function PuzzlePlay() {
     creator: { name: puzzle.author },
     date: new Date(puzzle.date).getTime(),
     entries: [
-      ...Object.entries(puzzle.clues_across || {}).map(([num, clue]: [string, any]) => ({
-        id: `${num}-across`,
-        number: parseInt(num),
-        humanNumber: num,
-        clue: typeof clue === 'string' ? clue : clue.clue,
-        direction: 'across' as const,
-        length: typeof clue === 'string' ? 0 : clue.length || 0,
-        group: [`${num}-across`],
-        position: { x: 0, y: 0 }, // Will be calculated from grid
-        separatorLocations: {},
-        solution: typeof clue === 'string' ? '' : clue.answer || '',
-      })),
-      ...Object.entries(puzzle.clues_down || {}).map(([num, clue]: [string, any]) => ({
-        id: `${num}-down`,
-        number: parseInt(num),
-        humanNumber: num,
-        clue: typeof clue === 'string' ? clue : clue.clue,
-        direction: 'down' as const,
-        length: typeof clue === 'string' ? 0 : clue.length || 0,
-        group: [`${num}-down`],
-        position: { x: 0, y: 0 }, // Will be calculated from grid
-        separatorLocations: {},
-        solution: typeof clue === 'string' ? '' : clue.answer || '',
-      })),
+      ...Object.entries(puzzle.clues_across || {}).map(([num, clue]: [string, any]) => {
+        const clueData = typeof clue === 'string' ? { clue, answer: '', length: 0 } : clue;
+        const pos = positions[parseInt(num)] || { x: 0, y: 0 };
+        return {
+          id: `${num}-across`,
+          number: parseInt(num),
+          humanNumber: num,
+          clue: clueData.clue,
+          direction: 'across' as const,
+          length: clueData.length || clueData.answer?.length || 0,
+          group: [`${num}-across`],
+          position: pos,
+          separatorLocations: {},
+          solution: clueData.answer || '',
+        };
+      }),
+      ...Object.entries(puzzle.clues_down || {}).map(([num, clue]: [string, any]) => {
+        const clueData = typeof clue === 'string' ? { clue, answer: '', length: 0 } : clue;
+        const pos = positions[parseInt(num)] || { x: 0, y: 0 };
+        return {
+          id: `${num}-down`,
+          number: parseInt(num),
+          humanNumber: num,
+          clue: clueData.clue,
+          direction: 'down' as const,
+          length: clueData.length || clueData.answer?.length || 0,
+          group: [`${num}-down`],
+          position: pos,
+          separatorLocations: {},
+          solution: clueData.answer || '',
+        };
+      }),
     ],
     solutionAvailable: false,
     dateSolutionAvailable: 0,
