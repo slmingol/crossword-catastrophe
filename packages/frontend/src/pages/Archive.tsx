@@ -45,6 +45,13 @@ export default function Archive() {
   );
 
   useEffect(() => {
+    // If no sources selected, show empty state immediately
+    if (selectedSources.size === 0) {
+      setData({ puzzles: [], pagination: { page, limit: 20, total: 0, pages: 0 } });
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     const sourcesArray = Array.from(selectedSources);
     Promise.all([
@@ -94,6 +101,24 @@ export default function Archive() {
         gap: '0.75rem'
       }}>
         <span style={{ fontWeight: '600', color: '#666', marginRight: '0.5rem' }}>Filter:</span>
+        <button
+          onClick={() => {
+            setSelectedSources(new Set());
+            setPage(1);
+          }}
+          style={{
+            padding: '0.3rem 0.6rem',
+            border: '1px solid #ddd',
+            borderRadius: '4px',
+            backgroundColor: 'white',
+            cursor: 'pointer',
+            fontSize: '0.7rem',
+            color: '#666',
+            transition: 'all 0.15s'
+          }}
+        >
+          Clear All
+        </button>
         {Object.entries(SOURCE_CONFIG).map(([name, config]) => {
           const isSelected = selectedSources.has(name);
           return (
