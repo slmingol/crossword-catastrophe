@@ -22,38 +22,43 @@ export default function Archive() {
 
   return (
     <div>
-      <h1 style={{ marginBottom: '2rem' }}>Puzzle Archive</h1>
+      <h1 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>Puzzle Archive</h1>
       {data && data.puzzles.length > 0 ? (
         <>
-          <div style={{ display: 'grid', gap: '1rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             {data.puzzles.map((puzzle: Puzzle) => (
               <Link
                 key={puzzle.id}
                 to={`/puzzle/${puzzle.id}`}
                 style={{
-                  display: 'block',
+                  display: 'flex',
+                  alignItems: 'center',
                   backgroundColor: 'white',
-                  padding: '1.5rem',
-                  borderRadius: '8px',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: '4px',
+                  border: '1px solid #e0e0e0',
                   textDecoration: 'none',
                   color: 'inherit',
-                  transition: 'transform 0.2s, box-shadow 0.2s'
+                  fontSize: '0.9rem',
+                  transition: 'background-color 0.15s'
                 }}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
+                  e.currentTarget.style.backgroundColor = '#f5f5f5';
                 }}
                 onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                  e.currentTarget.style.backgroundColor = 'white';
                 }}
               >
-                <h3 style={{ marginBottom: '0.5rem' }}>{puzzle.title}</h3>
-                <p style={{ color: '#666', fontSize: '0.9rem' }}>
-                  {format(new Date(puzzle.date), 'MMMM d, yyyy')} • {puzzle.author} • {puzzle.source}
+                <span style={{ fontWeight: '600', marginRight: '1rem', minWidth: '80px' }}>
+                  {format(new Date(puzzle.date), 'M/d/yy')}
+                </span>
+                <span style={{ fontWeight: '500', marginRight: '1rem', flex: '0 0 auto' }}>
+                  {puzzle.title}
+                </span>
+                <span style={{ color: '#666', fontSize: '0.85rem' }}>
+                  {puzzle.author.replace('By ', '')} • {puzzle.source}
                   {puzzle.difficulty && ` • ${puzzle.difficulty}`}
-                </p>
+                </span>
               </Link>
             ))}
           </div>
