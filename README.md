@@ -1,4 +1,10 @@
-# Crossword App
+# Crossword Catastrophe
+
+<div align="center">
+  <img src="packages/frontend/public/logo.png" alt="Crossword Catastrophe Logo" width="300" />
+</div>
+
+<div align="center">
 
 [![Build and Push](https://github.com/slmingol/crossword-catastrophe/actions/workflows/build-and-push.yml/badge.svg)](https://github.com/slmingol/crossword-catastrophe/actions/workflows/build-and-push.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -8,6 +14,8 @@
 [![Node.js](https://img.shields.io/badge/Node.js-20+-green?logo=node.js)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18+-61DAFB?logo=react)](https://reactjs.org/)
+
+</div>
 
 Self-hosted crossword puzzle application with daily puzzle scraping.
 

@@ -56,8 +56,9 @@ export default function Layout({ children }: LayoutProps) {
             minHeight: '2rem'
           }}>
             <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'nowrap', minWidth: 0 }}>
-              <Link to="/" style={{ color: 'white', textDecoration: 'none', fontSize: '1.3rem', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
-                🧩 Crossword Catastrophe
+              <Link to="/" style={{ color: 'white', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}>
+                <img src="/logo.png" alt="Crossword Catastrophe Logo" style={{ height: '2.5rem', width: 'auto' }} />
+                <span style={{ fontSize: '1.3rem', fontWeight: 'bold' }}>Crossword Catastrophe</span>
               </Link>
               <Link to="/archive" style={{ color: 'white', textDecoration: 'none', fontSize: '0.9rem', whiteSpace: 'nowrap' }}>
                 Archive
