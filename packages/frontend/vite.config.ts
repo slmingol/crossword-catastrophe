@@ -13,6 +13,8 @@ export default defineConfig({
       '127.0.0.1',
       'docker-host-01.bub.lan',
       '.bub.lan', // Allow all *.bub.lan domains
+      'crosscat.lamolabs.org',
+      '.lamolabs.org', // Allow all *.lamolabs.org domains
     ],
     proxy: {
       '/api': {
