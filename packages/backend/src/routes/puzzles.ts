@@ -61,8 +61,8 @@ puzzleRouter.get('/daily/today', async (req, res) => {
   try {
     const result = await db.query(
       `SELECT * FROM puzzles
-       WHERE date = CURRENT_DATE
-       ORDER BY created_at DESC
+       WHERE date >= CURRENT_DATE - INTERVAL '1 day'
+       ORDER BY date DESC, created_at DESC
        LIMIT 1`
     );
 
