@@ -3,6 +3,38 @@ import { Link } from 'react-router-dom';
 import { api, Puzzle, PuzzleListResponse, UserProgress } from '../api/client';
 import { format } from 'date-fns';
 
+// Source badge colors and abbreviations
+const SOURCE_CONFIG: Record<string, { abbr: string; color: string; bg: string }> = {
+  'USA Today': { abbr: 'USA', color: '#0052cc', bg: '#deebff' },
+  'Universal Crossword': { abbr: 'UNI', color: '#6554c0', bg: '#eae6ff' },
+  'Los Angeles Times': { abbr: 'LAT', color: '#00875a', bg: '#e3fcef' },
+  'Newsday': { abbr: 'ND', color: '#ff5630', bg: '#ffebe6' },
+};
+
+function SourceBadge({ source }: { source: string }) {
+  const config = SOURCE_CONFIG[source] || { abbr: source.slice(0, 3).toUpperCase(), color: '#666', bg: '#f0f0f0' };
+  
+  return (
+    <span
+      style={{
+        display: 'inline-block',
+        fontSize: '0.65rem',
+        fontWeight: '700',
+        padding: '0.2rem 0.4rem',
+        borderRadius: '3px',
+        backgroundColor: config.bg,
+        color: config.color,
+        marginRight: '0.75rem',
+        minWidth: '36px',
+        textAlign: 'center',
+        letterSpacing: '0.3px'
+      }}
+    >
+      {config.abbr}
+    </span>
+  );
+}
+
 export default function Archive() {
   const [data, setData] = useState<PuzzleListResponse | null>(null);
   const [progress, setProgress] = useState<Map<number, UserProgress>>(new Map());
@@ -65,13 +97,14 @@ export default function Archive() {
                   <span style={{ fontWeight: '600', marginRight: '1rem', minWidth: '80px' }}>
                     {format(new Date(puzzle.date), 'M/d/yy')}
                   </span>
+                  <SourceBadge source={puzzle.source} />
                   {isCompleted && <span style={{ marginRight: '0.5rem', color: '#28a745', fontSize: '1rem' }}>✓</span>}
                   {inProgress && <span style={{ marginRight: '0.5rem', color: '#ffc107', fontSize: '0.8rem' }}>●</span>}
                   <span style={{ fontWeight: '500', marginRight: '1rem', flex: '0 0 auto' }}>
                     {puzzle.title}
                   </span>
                   <span style={{ color: '#666', fontSize: '0.85rem' }}>
-                    {puzzle.author.replace('By ', '')} • {puzzle.source}
+                    {puzzle.author.replace('By ', '')}
                     {puzzle.difficulty && ` • ${puzzle.difficulty}`}
                   </span>
                 </Link>
