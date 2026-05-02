@@ -145,26 +145,26 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
 
   return (
     <div>
-      <div style={{ marginBottom: '0.75rem', display: 'flex', gap: '0.5rem' }}>
+      <div style={{ marginBottom: '0.5rem', display: 'flex', gap: '0.4rem' }}>
         <button onClick={checkAnswers} style={{
-          padding: '0.4rem 0.8rem',
+          padding: '0.35rem 0.7rem',
           backgroundColor: '#0066cc',
           color: 'white',
           border: 'none',
-          borderRadius: '4px',
+          borderRadius: '3px',
           cursor: 'pointer',
-          fontSize: '0.9rem'
+          fontSize: '0.85rem'
         }}>
           Check Answers
         </button>
         <button onClick={() => setShowSolution(!showSolution)} style={{
-          padding: '0.4rem 0.8rem',
+          padding: '0.35rem 0.7rem',
           backgroundColor: '#666',
           color: 'white',
           border: 'none',
-          borderRadius: '4px',
+          borderRadius: '3px',
           cursor: 'pointer',
-          fontSize: '0.9rem'
+          fontSize: '0.85rem'
         }}>
           {showSolution ? 'Hide' : 'Reveal'} Solution
         </button>
@@ -300,27 +300,27 @@ export default function PuzzlePlay() {
 
   return (
     <div>
-      <div style={{ marginBottom: '0.75rem' }}>
-        <Link to="/" style={{ color: '#0066cc', textDecoration: 'none', fontSize: '0.9rem' }}>← Back</Link>
+      <div style={{ marginBottom: '0.5rem' }}>
+        <Link to="/" style={{ color: '#0066cc', textDecoration: 'none', fontSize: '0.85rem' }}>← Back</Link>
       </div>
       <div style={{
         backgroundColor: 'white',
-        padding: '0.75rem 1rem',
-        borderRadius: '6px',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-        marginBottom: '1rem'
+        padding: '0.5rem 0.75rem',
+        borderRadius: '4px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+        marginBottom: '0.75rem'
       }}>
-        <h1 style={{ marginBottom: '0.15rem', fontSize: '1.25rem', lineHeight: '1.3' }}>{puzzle.title}</h1>
-        <p style={{ color: '#666', fontSize: '0.8rem', margin: 0, lineHeight: '1.4' }}>
+        <h1 style={{ marginBottom: '0.1rem', fontSize: '1.1rem', lineHeight: '1.2', fontWeight: '600' }}>{puzzle.title}</h1>
+        <p style={{ color: '#666', fontSize: '0.75rem', margin: 0, lineHeight: '1.3' }}>
           By {puzzle.author} • {puzzle.source}
           {puzzle.difficulty && ` • ${puzzle.difficulty}`} • {new Date(puzzle.date).toLocaleDateString()}
         </p>
       </div>
       <div style={{
         backgroundColor: 'white',
-        padding: '1rem',
-        borderRadius: '6px',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.1)'
+        padding: '0.75rem',
+        borderRadius: '4px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.08)'
       }}>
         <SimpleCrossword puzzle={puzzle} />
       </div>
