@@ -227,6 +227,7 @@ export default function PuzzlePlay() {
   const [userGrid, setUserGrid] = useState<string[][]>([]);
   const [startTime] = useState(Date.now());
   const [timeSpent, setTimeSpent] = useState(0);
+  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'info' } | null>(null);
   const { setActions } = usePuzzleActions();
 
   console.log('PuzzlePlay render:', { id, loading, hasPuzzle: !!puzzle });
@@ -318,10 +319,19 @@ export default function PuzzlePlay() {
       .catch(err => console.error('Failed to save progress:', err));
     
     if (isComplete) {
-      alert(`Congratulations! You completed the puzzle!\n${correct} out of ${total} correct in ${Math.floor(currentTimeSpent / 60)} minutes!`);
+      setNotification({
+        message: `🎉 Congratulations! You completed the puzzle! ${correct} out of ${total} correct in ${Math.floor(currentTimeSpent / 60)} minutes!`,
+        type: 'success'
+      });
     } else {
-      alert(`${correct} correct out of ${total}`);
+      setNotification({
+        message: `${correct} correct out of ${total}`,
+        type: 'info'
+      });
     }
+    
+    // Auto-hide notification after 5 seconds
+    setTimeout(() => setNotification(null), 5000);
   }, [puzzle, userGrid, timeSpent, startTime, id]);
 
   // Set actions in nav bar
@@ -374,11 +384,34 @@ export default function PuzzlePlay() {
   }
 
   return (
-    <SimpleCrossword 
-      puzzle={puzzle} 
-      showSolution={showSolution}
-      userGrid={userGrid}
-      setUserGrid={setUserGrid}
-    />
+    <div style={{ position: 'relative' }}>
+      {notification && (
+        <div style={{
+          position: 'fixed',
+          top: '80px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: notification.type === 'success' ? '#d4edda' : '#d1ecf1',
+          color: notification.type === 'success' ? '#155724' : '#0c5460',
+          padding: '1rem 2rem',
+          borderRadius: '6px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          zIndex: 1000,
+          border: `1px solid ${notification.type === 'success' ? '#c3e6cb' : '#bee5eb'}`,
+          fontSize: '1rem',
+          fontWeight: '500',
+          maxWidth: '90%',
+          animation: 'slideDown 0.3s ease-out'
+        }}>
+          {notification.message}
+        </div>
+      )}
+      <SimpleCrossword 
+        puzzle={puzzle} 
+        showSolution={showSolution}
+        userGrid={userGrid}
+        setUserGrid={setUserGrid}
+      />
+    </div>
   );
 }
