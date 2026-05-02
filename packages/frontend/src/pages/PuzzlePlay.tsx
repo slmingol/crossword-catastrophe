@@ -318,18 +318,3 @@ export default function PuzzlePlay() {
     />
   );
 }
-        backgroundColor: 'white',
-        padding: '0.75rem',
-        borderRadius: '4px',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.08)'
-      }}>
-        <SimpleCrossword 
-          puzzle={puzzle} 
-          showSolution={showSolution}
-          userGrid={userGrid}
-          setUserGrid={setUserGrid}
-        />
-      </div>
-    </div>
-  );
-}
