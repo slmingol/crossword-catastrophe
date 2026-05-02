@@ -40,6 +40,9 @@ export default function Archive() {
   const [progress, setProgress] = useState<Map<number, UserProgress>>(new Map());
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [selectedSources, setSelectedSources] = useState<Set<string>>(
+    new Set(Object.keys(SOURCE_CONFIG))
+  );
 
   useEffect(() => {
     setLoading(true);
@@ -56,6 +59,20 @@ export default function Archive() {
       .finally(() => setLoading(false));
   }, [page]);
 
+  const toggleSource = (source: string) => {
+    setSelectedSources(prev => {
+      const next = new Set(prev);
+      if (next.has(source)) {
+        next.delete(source);
+      } else {
+        next.add(source);
+      }
+      return next;
+    });
+  };
+
+  const filteredPuzzles = data?.puzzles.filter(p => selectedSources.has(p.source)) || [];
+
   if (loading && !data) {
     return <div style={{ textAlign: 'center', padding: '4rem' }}>Loading archive...</div>;
   }
@@ -64,7 +81,7 @@ export default function Archive() {
     <div>
       <h1 style={{ marginBottom: '0.5rem', fontSize: '1.5rem' }}>Puzzle Archive</h1>
       
-      {/* Legend */}
+      {/* Filter */}
       <div style={{ 
         marginBottom: '1.5rem', 
         padding: '0.75rem 1rem', 
@@ -72,35 +89,57 @@ export default function Archive() {
         borderRadius: '4px',
         fontSize: '0.85rem'
       }}>
-        <span style={{ fontWeight: '600', marginRight: '1rem', color: '#666' }}>Sources:</span>
-        {Object.entries(SOURCE_CONFIG).map(([name, config]) => (
-          <span key={name} style={{ display: 'inline-flex', alignItems: 'center', marginRight: '1.5rem' }}>
-            <span
+        <span style={{ fontWeight: '600', marginRight: '1rem', color: '#666' }}>Filter by source:</span>
+        {Object.entries(SOURCE_CONFIG).map(([name, config]) => {
+          const isSelected = selectedSources.has(name);
+          return (
+            <button
+              key={name}
+              onClick={() => toggleSource(name)}
               style={{
-                display: 'inline-block',
-                fontSize: '0.65rem',
-                fontWeight: '700',
-                padding: '0.2rem 0.4rem',
-                borderRadius: '3px',
-                backgroundColor: config.bg,
-                color: config.color,
-                marginRight: '0.4rem',
-                minWidth: '36px',
-                textAlign: 'center',
-                letterSpacing: '0.3px'
+                display: 'inline-flex',
+                alignItems: 'center',
+                marginRight: '1rem',
+                marginBottom: '0.5rem',
+                padding: '0.4rem 0.6rem',
+                border: `2px solid ${isSelected ? config.color : '#ddd'}`,
+                borderRadius: '4px',
+                backgroundColor: isSelected ? config.bg : 'white',
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+                opacity: isSelected ? 1 : 0.6
               }}
             >
-              {config.abbr}
-            </span>
-            <span style={{ color: '#666' }}>{name}</span>
-          </span>
-        ))}
+              <span
+                style={{
+                  display: 'inline-block',
+                  fontSize: '0.65rem',
+                  fontWeight: '700',
+                  padding: '0.2rem 0.4rem',
+                  borderRadius: '3px',
+                  backgroundColor: config.bg,
+                  color: config.color,
+                  marginRight: '0.5rem',
+                  minWidth: '36px',
+                  textAlign: 'center',
+                  letterSpacing: '0.3px'
+                }}
+              >
+                {config.abbr}
+              </span>
+              <span style={{ color: '#333', fontSize: '0.85rem', fontWeight: '500' }}>{name}</span>
+            </button>
+          );
+        })}
+        <div style={{ marginTop: '0.5rem', color: '#666', fontSize: '0.8rem' }}>
+          Showing {filteredPuzzles.length} of {data?.puzzles.length || 0} puzzles
+        </div>
       </div>
       
-      {data && data.puzzles.length > 0 ? (
+      {data && filteredPuzzles.length > 0 ? (
         <>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            {data.puzzles.map((puzzle: Puzzle) => {
+            {filteredPuzzles.map((puzzle: Puzzle) => {
               const puzzleProgress = progress.get(puzzle.id);
               const isCompleted = puzzleProgress?.completed || false;
               const inProgress = puzzleProgress && !puzzleProgress.completed;
@@ -185,6 +224,10 @@ export default function Archive() {
             </button>
           </div>
         </>
+      ) : data && data.puzzles.length > 0 ? (
+        <div style={{ textAlign: 'center', padding: '4rem', color: '#666' }}>
+          No puzzles match the selected filters. Try selecting more sources.
+        </div>
       ) : (
         <div style={{ textAlign: 'center', padding: '4rem', color: '#666' }}>
           No puzzles in archive yet. The scraper will download puzzles daily.
