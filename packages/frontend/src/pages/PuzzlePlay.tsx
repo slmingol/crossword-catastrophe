@@ -58,6 +58,7 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
     if (solution[rowIdx][colIdx] === '.') return;
 
     if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
+      e.preventDefault();
       const newGrid = userGrid.map(row => [...row]);
       newGrid[rowIdx][colIdx] = e.key.toUpperCase();
       setUserGrid(newGrid);
@@ -66,28 +67,47 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
       let nextCol = colIdx + 1;
       while (nextCol < width && solution[rowIdx][nextCol] === '.') nextCol++;
       if (nextCol < width) {
-        setFocusedCell({ row: rowIdx, col: nextCol });
+        setTimeout(() => {
+          const nextKey = `${rowIdx}-${nextCol}`;
+          cellRefs.current[nextKey]?.focus();
+        }, 0);
       }
     } else if (e.key === 'Backspace') {
       const newGrid = userGrid.map(row => [...row]);
       newGrid[rowIdx][colIdx] = '';
       setUserGrid(newGrid);
     } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
       let nextCol = colIdx + 1;
       while (nextCol < width && solution[rowIdx][nextCol] === '.') nextCol++;
-      if (nextCol < width) setFocusedCell({ row: rowIdx, col: nextCol });
+      if (nextCol < width) {
+        const nextKey = `${rowIdx}-${nextCol}`;
+        cellRefs.current[nextKey]?.focus();
+      }
     } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
       let prevCol = colIdx - 1;
       while (prevCol >= 0 && solution[rowIdx][prevCol] === '.') prevCol--;
-      if (prevCol >= 0) setFocusedCell({ row: rowIdx, col: prevCol });
+      if (prevCol >= 0) {
+        const prevKey = `${rowIdx}-${prevCol}`;
+        cellRefs.current[prevKey]?.focus();
+      }
     } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
       let nextRow = rowIdx + 1;
       while (nextRow < height && solution[nextRow][colIdx] === '.') nextRow++;
-      if (nextRow < height) setFocusedCell({ row: nextRow, col: colIdx });
+      if (nextRow < height) {
+        const nextKey = `${nextRow}-${colIdx}`;
+        cellRefs.current[nextKey]?.focus();
+      }
     } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
       let prevRow = rowIdx - 1;
       while (prevRow >= 0 && solution[prevRow][colIdx] === '.') prevRow--;
-      if (prevRow >= 0) setFocusedCell({ row: prevRow, col: colIdx });
+      if (prevRow >= 0) {
+        const prevKey = `${prevRow}-${colIdx}`;
+        cellRefs.current[prevKey]?.focus();
+      }
     }
   };
 
