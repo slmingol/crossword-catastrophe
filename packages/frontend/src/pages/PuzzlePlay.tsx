@@ -8,6 +8,14 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
   const width = puzzle.grid_data?.width || 15;
   const height = puzzle.grid_data?.height || 15;
 
+  console.log('SimpleCrossword render:', {
+    hasSolution: !!solution.length,
+    solutionLength: solution.length,
+    width,
+    height,
+    firstRow: solution[0]
+  });
+
   return (
     <div>
       <div style={{ 
@@ -70,18 +78,33 @@ export default function PuzzlePlay() {
   const { id } = useParams<{ id: string }>();
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  console.log('PuzzlePlay render:', { id, loading, hasPuzzle: !!puzzle });
 
   useEffect(() => {
+    console.log('PuzzlePlay useEffect triggered, id:', id);
     if (id) {
+      console.log('Fetching puzzle', id);
       api.getPuzzle(parseInt(id))
-        .then(setPuzzle)
-        .catch(console.error)
+        .then(data => {
+          console.log('Puzzle fetched successfully:', data);
+          setPuzzle(data);
+        })
+        .catch(err => {
+          console.error('Error fetching puzzle:', err);
+          setError(err.message);
+        })
         .finally(() => setLoading(false));
     }
   }, [id]);
 
   if (loading) {
     return <div style={{ textAlign: 'center', padding: '4rem' }}>Loading puzzle...</div>;
+  }
+
+  if (error) {
+    return <div style={{ textAlign: 'center', padding: '4rem', color: 'red' }}>Error: {error}</div>;
   }
 
   if (!puzzle) {
