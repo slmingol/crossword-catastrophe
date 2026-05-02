@@ -11,14 +11,14 @@
     "historical": "tsx src/historical.ts"
   },
   "dependencies": {
-    "pg": "^8.11.5",
+    "better-sqlite3": "^12.9.0",
     "dotenv": "^16.4.5",
     "node-cron": "^3.0.3",
     "zod": "^3.23.6"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20.12.7",
-    "@types/pg": "^8.11.5",
     "@types/node-cron": "^3.0.11",
     "tsx": "^4.7.2",
     "typescript": "^5.4.5"

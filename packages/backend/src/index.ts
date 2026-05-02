@@ -3,8 +3,15 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { puzzleRouter } from './routes/puzzles.js';
 import { db } from './db/client.js';
+import { migrate } from './db/migrate.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -26,11 +33,51 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   res.status(500).json({ error: 'Internal server error' });
 });
 
-async function start() {
+function start() {
   try {
-    // Test database connection
-    await db.query('SELECT NOW()');
-    console.log('Database connected');
+    // Ensure data directory exists
+    const dataDir = path.join(__dirname, '../../..', 'data');
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+
+    // Run migrations
+    console.log('Running database migrations...');
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS puzzles (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title VARCHAR(255) NOT NULL,
+        author VARCHAR(255),
+        source VARCHAR(100) NOT NULL,
+        date DATE NOT NULL,
+        difficulty VARCHAR(50),
+        grid_data TEXT NOT NULL,
+        clues_across TEXT NOT NULL,
+        clues_down TEXT NOT NULL,
+        created_at TEXT DEFAULT (datetime('now')),
+        UNIQUE(source, date)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_puzzles_date ON puzzles(date DESC);
+      CREATE INDEX IF NOT EXISTS idx_puzzles_source ON puzzles(source);
+
+      CREATE TABLE IF NOT EXISTS user_progress (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        puzzle_id INTEGER NOT NULL,
+        user_id VARCHAR(100),
+        progress_data TEXT,
+        completed BOOLEAN DEFAULT 0,
+        time_spent INTEGER DEFAULT 0,
+        last_updated TEXT DEFAULT (datetime('now')),
+        UNIQUE(puzzle_id, user_id),
+        FOREIGN KEY (puzzle_id) REFERENCES puzzles(id) ON DELETE CASCADE
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_user_progress_puzzle ON user_progress(puzzle_id);
+      CREATE INDEX IF NOT EXISTS idx_user_progress_user ON user_progress(user_id, last_updated DESC);
+    `);
+    
+    console.log('Database ready');
 
     app.listen(PORT, () => {
       console.log(`Backend server running on http://localhost:${PORT}`);

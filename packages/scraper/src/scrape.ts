@@ -62,12 +62,9 @@ async function scrapeSingleSourceForDate(source: string, displayName: string, da
 
   try {
     // Check if puzzle already exists before downloading
-    const existing = await db.query(
-      'SELECT id FROM puzzles WHERE source = $1 AND date = $2',
-      [displayName, dateStr]
-    );
+    const existing = db.prepare('SELECT id FROM puzzles WHERE source = ? AND date = ?').get(displayName, dateStr);
 
-    if (existing.rows.length > 0) {
+    if (existing) {
       console.log(`Puzzle from ${displayName} for ${dateStr} already exists, skipping`);
       return;
     }
@@ -87,19 +84,20 @@ async function scrapeSingleSourceForDate(source: string, displayName: string, da
     const puzzleData = parsePuzFile(fileBuffer);
 
     // Store in database
-    await db.query(
-      `INSERT INTO puzzles (title, author, source, date, difficulty, grid_data, clues_across, clues_down)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [
-        puzzleData.title,
-        puzzleData.author,
-        displayName,
-        dateStr,
-        puzzleData.difficulty,
-        JSON.stringify(puzzleData.grid),
-        JSON.stringify(puzzleData.cluesAcross),
-        JSON.stringify(puzzleData.cluesDown),
-      ]
+    const stmt = db.prepare(`
+      INSERT INTO puzzles (title, author, source, date, difficulty, grid_data, clues_across, clues_down)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    stmt.run(
+      puzzleData.title,
+      puzzleData.author,
+      displayName,
+      dateStr,
+      puzzleData.difficulty,
+      JSON.stringify(puzzleData.grid),
+      JSON.stringify(puzzleData.cluesAcross),
+      JSON.stringify(puzzleData.cluesDown)
     );
 
     console.log(`Successfully saved ${displayName} puzzle for ${dateStr}`);

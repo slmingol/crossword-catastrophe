@@ -4,7 +4,7 @@ import { db } from '../db/client.js';
 export const puzzleRouter = express.Router();
 
 // Get all puzzles with pagination
-puzzleRouter.get('/', async (req, res) => {
+puzzleRouter.get('/', (req, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
@@ -13,28 +13,29 @@ puzzleRouter.get('/', async (req, res) => {
 
     let query = `SELECT id, title, author, source, date, difficulty, created_at
        FROM puzzles`;
-    let countQuery = 'SELECT COUNT(*) FROM puzzles';
+    let countQuery = 'SELECT COUNT(*) as count FROM puzzles';
     const queryParams: any[] = [];
     const countParams: any[] = [];
 
     // Add source filter if provided
     if (sources) {
       const sourceArray = sources.split(',');
-      query += ` WHERE source = ANY($1)`;
-      countQuery += ` WHERE source = ANY($1)`;
-      queryParams.push(sourceArray);
-      countParams.push(sourceArray);
+      const placeholders = sourceArray.map(() => '?').join(',');
+      query += ` WHERE source IN (${placeholders})`;
+      countQuery += ` WHERE source IN (${placeholders})`;
+      queryParams.push(...sourceArray);
+      countParams.push(...sourceArray);
     }
 
-    query += ` ORDER BY date DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
+    query += ` ORDER BY date DESC LIMIT ? OFFSET ?`;
     queryParams.push(limit, offset);
 
-    const result = await db.query(query, queryParams);
-    const countResult = await db.query(countQuery, countParams);
-    const total = parseInt(countResult.rows[0].count);
+    const puzzles = db.prepare(query).all(...queryParams);
+    const countResult = db.prepare(countQuery).get(...countParams) as { count: number };
+    const total = countResult.count;
 
     res.json({
-      puzzles: result.rows,
+      puzzles,
       pagination: {
         page,
         limit,
@@ -49,19 +50,24 @@ puzzleRouter.get('/', async (req, res) => {
 });
 
 // Get puzzle by ID
-puzzleRouter.get('/:id', async (req, res) => {
+puzzleRouter.get('/:id', (req, res) => {
   try {
     const { id } = req.params;
-    const result = await db.query(
-      'SELECT * FROM puzzles WHERE id = $1',
-      [id]
-    );
+    const puzzle = db.prepare('SELECT * FROM puzzles WHERE id = ?').get(id);
 
-    if (result.rows.length === 0) {
+    if (!puzzle) {
       return res.status(404).json({ error: 'Puzzle not found' });
     }
 
-    res.json(result.rows[0]);
+    // Parse JSON strings back to objects
+    const result = {
+      ...puzzle as any,
+      grid_data: JSON.parse((puzzle as any).grid_data),
+      clues_across: JSON.parse((puzzle as any).clues_across),
+      clues_down: JSON.parse((puzzle as any).clues_down),
+    };
+
+    res.json(result);
   } catch (error) {
     console.error('Error fetching puzzle:', error);
     res.status(500).json({ error: 'Failed to fetch puzzle' });
@@ -69,20 +75,28 @@ puzzleRouter.get('/:id', async (req, res) => {
 });
 
 // Get today's puzzle
-puzzleRouter.get('/daily/today', async (req, res) => {
+puzzleRouter.get('/daily/today', (req, res) => {
   try {
-    const result = await db.query(
-      `SELECT * FROM puzzles
-       WHERE date >= CURRENT_DATE - INTERVAL '1 day'
-       ORDER BY date DESC, created_at DESC
-       LIMIT 1`
-    );
+    const puzzle = db.prepare(`
+      SELECT * FROM puzzles
+      WHERE date >= date('now', '-1 day')
+      ORDER BY date DESC, created_at DESC
+      LIMIT 1
+    `).get();
 
-    if (result.rows.length === 0) {
+    if (!puzzle) {
       return res.status(404).json({ error: 'No puzzle available for today' });
     }
 
-    res.json(result.rows[0]);
+    // Parse JSON strings
+    const result = {
+      ...puzzle as any,
+      grid_data: JSON.parse((puzzle as any).grid_data),
+      clues_across: JSON.parse((puzzle as any).clues_across),
+      clues_down: JSON.parse((puzzle as any).clues_down),
+    };
+
+    res.json(result);
   } catch (error) {
     console.error('Error fetching daily puzzle:', error);
     res.status(500).json({ error: 'Failed to fetch daily puzzle' });
@@ -90,22 +104,23 @@ puzzleRouter.get('/daily/today', async (req, res) => {
 });
 
 // Save user progress
-puzzleRouter.post('/:id/progress', async (req, res) => {
+puzzleRouter.post('/:id/progress', (req, res) => {
   try {
     const { id } = req.params;
     const { userId = 'anonymous', progressData, completed, timeSpent } = req.body;
 
-    await db.query(
-      `INSERT INTO user_progress (puzzle_id, user_id, progress_data, completed, time_spent)
-       VALUES ($1, $2, $3, $4, $5)
-       ON CONFLICT (puzzle_id, user_id) 
-       DO UPDATE SET
-         progress_data = $3,
-         completed = $4,
-         time_spent = $5,
-         last_updated = NOW()`,
-      [id, userId, JSON.stringify(progressData), completed, timeSpent]
-    );
+    const stmt = db.prepare(`
+      INSERT INTO user_progress (puzzle_id, user_id, progress_data, completed, time_spent)
+      VALUES (?, ?, ?, ?, ?)
+      ON CONFLICT (puzzle_id, user_id)
+      DO UPDATE SET
+        progress_data = excluded.progress_data,
+        completed = excluded.completed,
+        time_spent = excluded.time_spent,
+        last_updated = datetime('now')
+    `);
+
+    stmt.run(id, userId, JSON.stringify(progressData), completed ? 1 : 0, timeSpent);
 
     res.json({ success: true });
   } catch (error) {
@@ -115,38 +130,51 @@ puzzleRouter.post('/:id/progress', async (req, res) => {
 });
 
 // Get user's current puzzle (in progress or latest)
-puzzleRouter.get('/current/:userId', async (req, res) => {
+puzzleRouter.get('/current/:userId', (req, res) => {
   try {
     const { userId } = req.params;
 
     // First, check if there's an incomplete puzzle
-    const inProgressResult = await db.query(
-      `SELECT p.*, up.progress_data, up.completed, up.time_spent, up.last_updated
-       FROM puzzles p
-       JOIN user_progress up ON p.id = up.puzzle_id
-       WHERE up.user_id = $1 AND up.completed = false
-       ORDER BY up.last_updated DESC
-       LIMIT 1`,
-      [userId]
-    );
+    const inProgress = db.prepare(`
+      SELECT p.*, up.progress_data, up.completed, up.time_spent, up.last_updated
+      FROM puzzles p
+      JOIN user_progress up ON p.id = up.puzzle_id
+      WHERE up.user_id = ? AND up.completed = 0
+      ORDER BY up.last_updated DESC
+      LIMIT 1
+    `).get(userId);
 
-    if (inProgressResult.rows.length > 0) {
-      return res.json(inProgressResult.rows[0]);
+    if (inProgress) {
+      const result = {
+        ...inProgress as any,
+        grid_data: JSON.parse((inProgress as any).grid_data),
+        clues_across: JSON.parse((inProgress as any).clues_across),
+        clues_down: JSON.parse((inProgress as any).clues_down),
+        progress_data: JSON.parse((inProgress as any).progress_data),
+      };
+      return res.json(result);
     }
 
     // If no incomplete puzzle, return the latest puzzle
-    const latestResult = await db.query(
-      `SELECT * FROM puzzles
-       WHERE date >= CURRENT_DATE - INTERVAL '1 day'
-       ORDER BY date DESC, created_at DESC
-       LIMIT 1`
-    );
+    const latest = db.prepare(`
+      SELECT * FROM puzzles
+      WHERE date >= date('now', '-1 day')
+      ORDER BY date DESC, created_at DESC
+      LIMIT 1
+    `).get();
 
-    if (latestResult.rows.length === 0) {
+    if (!latest) {
       return res.status(404).json({ error: 'No puzzle available' });
     }
 
-    res.json(latestResult.rows[0]);
+    const result = {
+      ...latest as any,
+      grid_data: JSON.parse((latest as any).grid_data),
+      clues_across: JSON.parse((latest as any).clues_across),
+      clues_down: JSON.parse((latest as any).clues_down),
+    };
+
+    res.json(result);
   } catch (error) {
     console.error('Error fetching current puzzle:', error);
     res.status(500).json({ error: 'Failed to fetch current puzzle' });
@@ -154,21 +182,26 @@ puzzleRouter.get('/current/:userId', async (req, res) => {
 });
 
 // Get user progress for a specific puzzle
-puzzleRouter.get('/:id/progress/:userId', async (req, res) => {
+puzzleRouter.get('/:id/progress/:userId', (req, res) => {
   try {
     const { id, userId } = req.params;
 
-    const result = await db.query(
-      `SELECT * FROM user_progress
-       WHERE puzzle_id = $1 AND user_id = $2`,
-      [id, userId]
-    );
+    const progress = db.prepare(`
+      SELECT * FROM user_progress
+      WHERE puzzle_id = ? AND user_id = ?
+    `).get(id, userId);
 
-    if (result.rows.length === 0) {
+    if (!progress) {
       return res.json(null);
     }
 
-    res.json(result.rows[0]);
+    // Parse JSON
+    const result = {
+      ...progress as any,
+      progress_data: JSON.parse((progress as any).progress_data),
+    };
+
+    res.json(result);
   } catch (error) {
     console.error('Error fetching user progress:', error);
     res.status(500).json({ error: 'Failed to fetch user progress' });
@@ -176,20 +209,25 @@ puzzleRouter.get('/:id/progress/:userId', async (req, res) => {
 });
 
 // Get all user progress
-puzzleRouter.get('/progress/:userId', async (req, res) => {
+puzzleRouter.get('/progress/:userId', (req, res) => {
   try {
     const { userId } = req.params;
 
-    const result = await db.query(
-      `SELECT up.*, p.title, p.author, p.source, p.date
-       FROM user_progress up
-       JOIN puzzles p ON up.puzzle_id = p.id
-       WHERE up.user_id = $1
-       ORDER BY up.last_updated DESC`,
-      [userId]
-    );
+    const progressList = db.prepare(`
+      SELECT up.*, p.title, p.author, p.source, p.date
+      FROM user_progress up
+      JOIN puzzles p ON up.puzzle_id = p.id
+      WHERE up.user_id = ?
+      ORDER BY up.last_updated DESC
+    `).all(userId);
 
-    res.json(result.rows);
+    // Parse JSON fields
+    const results = progressList.map((item: any) => ({
+      ...item,
+      progress_data: JSON.parse(item.progress_data),
+    }));
+
+    res.json(results);
   } catch (error) {
     console.error('Error fetching user progress:', error);
     res.status(500).json({ error: 'Failed to fetch user progress' });
@@ -197,36 +235,32 @@ puzzleRouter.get('/progress/:userId', async (req, res) => {
 });
 
 // Get previous puzzle
-puzzleRouter.get('/:id/previous', async (req, res) => {
+puzzleRouter.get('/:id/previous', (req, res) => {
   try {
     const { id } = req.params;
     
     // Get current puzzle's date
-    const currentResult = await db.query(
-      'SELECT date FROM puzzles WHERE id = $1',
-      [id]
-    );
+    const current = db.prepare('SELECT date FROM puzzles WHERE id = ?').get(id) as { date: string } | undefined;
     
-    if (currentResult.rows.length === 0) {
+    if (!current) {
       return res.status(404).json({ error: 'Puzzle not found' });
     }
     
-    const currentDate = currentResult.rows[0].date;
+    const currentDate = current.date;
     
     // Get the most recent puzzle before this date
-    const result = await db.query(
-      `SELECT id FROM puzzles
-       WHERE date < $1
-       ORDER BY date DESC, id DESC
-       LIMIT 1`,
-      [currentDate]
-    );
+    const previous = db.prepare(`
+      SELECT id FROM puzzles
+      WHERE date < ?
+      ORDER BY date DESC, id DESC
+      LIMIT 1
+    `).get(currentDate);
     
-    if (result.rows.length === 0) {
+    if (!previous) {
       return res.status(404).json({ error: 'No previous puzzle' });
     }
     
-    res.json(result.rows[0]);
+    res.json(previous);
   } catch (error) {
     console.error('Error fetching previous puzzle:', error);
     res.status(500).json({ error: 'Failed to fetch previous puzzle' });
@@ -234,36 +268,32 @@ puzzleRouter.get('/:id/previous', async (req, res) => {
 });
 
 // Get next puzzle
-puzzleRouter.get('/:id/next', async (req, res) => {
+puzzleRouter.get('/:id/next', (req, res) => {
   try {
     const { id } = req.params;
     
     // Get current puzzle's date
-    const currentResult = await db.query(
-      'SELECT date FROM puzzles WHERE id = $1',
-      [id]
-    );
+    const current = db.prepare('SELECT date FROM puzzles WHERE id = ?').get(id) as { date: string } | undefined;
     
-    if (currentResult.rows.length === 0) {
+    if (!current) {
       return res.status(404).json({ error: 'Puzzle not found' });
     }
     
-    const currentDate = currentResult.rows[0].date;
+    const currentDate = current.date;
     
     // Get the earliest puzzle after this date
-    const result = await db.query(
-      `SELECT id FROM puzzles
-       WHERE date > $1
-       ORDER BY date ASC, id ASC
-       LIMIT 1`,
-      [currentDate]
-    );
+    const next = db.prepare(`
+      SELECT id FROM puzzles
+      WHERE date > ?
+      ORDER BY date ASC, id ASC
+      LIMIT 1
+    `).get(currentDate);
     
-    if (result.rows.length === 0) {
+    if (!next) {
       return res.status(404).json({ error: 'No next puzzle' });
     }
     
-    res.json(result.rows[0]);
+    res.json(next);
   } catch (error) {
     console.error('Error fetching next puzzle:', error);
     res.status(500).json({ error: 'Failed to fetch next puzzle' });
