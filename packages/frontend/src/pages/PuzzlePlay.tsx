@@ -179,23 +179,27 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }:
 
   // Calculate responsive cell size
   const isMobile = windowWidth < 768;
-  const cellSize = isMobile 
-    ? Math.min(Math.floor((windowWidth - 40) / width), 34) // Max 34px, scale down on small screens
-    : 34;
+  // Account for: main padding (16px), grid padding (4px), grid border (2px), cell borders (~15px), margin (~10px)
+  const paddingOverhead = isMobile ? 50 : 0;
+  const availableWidth = windowWidth - paddingOverhead;
+  const maxCellSize = isMobile ? 26 : 34; // Smaller max size on mobile
+  const calculatedSize = Math.floor(availableWidth / width);
+  const cellSize = Math.min(Math.max(calculatedSize, 10), maxCellSize); // Min 10px, max 26/34px
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: isMobile ? '1rem' : '2rem', alignItems: 'flex-start', flexWrap: 'wrap', padding: isMobile ? '0.5rem' : '0' }}>
+      <div style={{ display: 'flex', gap: isMobile ? '0.5rem' : '2rem', alignItems: 'flex-start', flexWrap: 'wrap', padding: '0' }}>
         <div style={{ 
           display: 'grid',
           gridTemplateColumns: `repeat(${width}, ${cellSize}px)`,
           gridTemplateRows: `repeat(${height}, ${cellSize}px)`,
           gap: 0,
-          border: `2px solid ${colors.gridBorder}`,
+          border: `1px solid ${colors.gridBorder}`,
           maxWidth: '100%',
           flexShrink: 0,
           margin: isMobile ? '0 auto' : '0',
-          touchAction: 'manipulation' // Better touch handling on mobile
+          touchAction: 'manipulation',
+          overflow: 'visible'
         }}>
         {solution.map((row: string[], rowIdx: number) => 
           row.map((cell: string, colIdx: number) => {

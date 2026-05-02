@@ -121,7 +121,7 @@ export default function Layout({ children }: LayoutProps) {
           <header style={{
             backgroundColor: colors.headerBg,
             color: colors.headerText,
-            padding: '0.75rem 2rem',
+            padding: window.innerWidth < 768 ? '0.5rem 0.75rem' : '0.75rem 2rem',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
           }}>
           <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
@@ -236,7 +236,7 @@ export default function Layout({ children }: LayoutProps) {
             )}
           </div>
         </header>
-        <main style={{ flex: 1, padding: '2rem', maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
+        <main style={{ flex: 1, padding: window.innerWidth < 768 ? '0.5rem' : '2rem', maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
           {children}
         </main>
         <footer style={{
