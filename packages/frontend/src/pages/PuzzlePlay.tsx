@@ -138,9 +138,9 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid }: {
           row.map((cell: string, colIdx: number) => {
             const isFocused = focusedCell?.row === rowIdx && focusedCell?.col === colIdx;
             const userValue = userGrid[rowIdx]?.[colIdx] || '';
-            const displayValue = showSolution ? cell : userValue;
-            const isCorrect = userValue && userValue === cell;
-            const isWrong = userValue && userValue !== cell && userValue !== '';
+            const displayValue = showSolution ? cell : (userValue === '.' ? '' : userValue);
+            const isCorrect = userValue && userValue !== '.' && userValue === cell;
+            const isWrong = userValue && userValue !== '.' && userValue !== cell && userValue !== '';
             const clueNum = clueNumbers[rowIdx][colIdx];
             
             return (
@@ -319,7 +319,7 @@ export default function PuzzlePlay() {
             setUserGrid(progress.progress_data);
             setTimeSpent(progress.time_spent || 0);
           } else {
-            setUserGrid(solution.map(row => row.map(cell => cell === '.' ? '.' : '')));
+            setUserGrid(solution.map(row => row.map(() => '')));
           }
         })
         .catch(err => {
