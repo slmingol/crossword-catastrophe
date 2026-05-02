@@ -24,7 +24,4 @@ services:
     image: ghcr.io/slmingol/crossword-catastrophe-frontend:latest
     ports:
       - "9999:3000"
-    environment:
-      # Override this with your actual hostname
-      VITE_API_URL: ${API_URL:-http://localhost:9998/api}
     restart: unless-stopped
