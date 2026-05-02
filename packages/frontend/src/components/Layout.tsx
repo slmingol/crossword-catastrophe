@@ -57,7 +57,7 @@ export default function Layout({ children }: LayoutProps) {
           }}>
             <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'nowrap', minWidth: 0 }}>
               <Link to="/" style={{ color: 'white', textDecoration: 'none', fontSize: '1.3rem', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
-                🧩 Crossword
+                🧩 Crossword Catastrophe
               </Link>
               <Link to="/archive" style={{ color: 'white', textDecoration: 'none', fontSize: '0.9rem', whiteSpace: 'nowrap' }}>
                 Archive
