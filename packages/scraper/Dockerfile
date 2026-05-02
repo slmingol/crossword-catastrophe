@@ -6,11 +6,10 @@ RUN apt-get update && apt-get install -y curl git && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy local xword-dl fork with Seattle Times Midi support
-COPY xword-dl /tmp/xword-dl
-
-# Install xword-dl from local copy
-RUN pip install --no-cache-dir /tmp/xword-dl && rm -rf /tmp/xword-dl
+# Install xword-dl from slmingol's fork with Seattle Times Midi support
+# Branch: feature/seattle-times-midi
+# TODO: Once PR is merged upstream, switch back to: git+https://github.com/thisisparker/xword-dl.git
+RUN pip install --no-cache-dir git+https://github.com/slmingol/xword-dl.git@feature/seattle-times-midi
 
 WORKDIR /app
 
