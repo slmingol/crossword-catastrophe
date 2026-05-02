@@ -17,6 +17,14 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }:
 
   const [focusedCell, setFocusedCell] = useState<{row: number, col: number} | null>(null);
   const cellRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
+
+  // Handle window resize for responsive grid
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Theme colors
   const colors = theme === 'dark' ? {
@@ -169,18 +177,25 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }:
     }
   };
 
+  // Calculate responsive cell size
+  const isMobile = windowWidth < 768;
+  const cellSize = isMobile 
+    ? Math.min(Math.floor((windowWidth - 40) / width), 34) // Max 34px, scale down on small screens
+    : 34;
+
   return (
     <div>
-      <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: isMobile ? '1rem' : '2rem', alignItems: 'flex-start', flexWrap: 'wrap', padding: isMobile ? '0.5rem' : '0' }}>
         <div style={{ 
           display: 'grid',
-          gridTemplateColumns: `repeat(${width}, 34px)`,
-          gridTemplateRows: `repeat(${height}, 34px)`,
+          gridTemplateColumns: `repeat(${width}, ${cellSize}px)`,
+          gridTemplateRows: `repeat(${height}, ${cellSize}px)`,
           gap: 0,
           border: `2px solid ${colors.gridBorder}`,
-          width: `${width * 34 + 4}px`, // Explicit width: cells + border
-          height: `${height * 34 + 4}px`, // Explicit height: cells + border
-          flexShrink: 0
+          maxWidth: '100%',
+          flexShrink: 0,
+          margin: isMobile ? '0 auto' : '0',
+          touchAction: 'manipulation' // Better touch handling on mobile
         }}>
         {solution.map((row: string[], rowIdx: number) => 
           row.map((cell: string, colIdx: number) => {
@@ -200,8 +215,8 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }:
                 onKeyDown={(e) => handleKeyDown(e, rowIdx, colIdx)}
                 onFocus={() => cell !== '.' && setFocusedCell({ row: rowIdx, col: colIdx })}
                 style={{
-                  width: '34px',
-                  height: '34px',
+                  width: `${cellSize}px`,
+                  height: `${cellSize}px`,
                   border: `1px solid ${colors.cellBorder}`,
                   backgroundColor: cell === '.' ? colors.cellBlack : 
                                    isFocused ? colors.cellFocused : 
@@ -213,7 +228,7 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }:
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '17px',
+                  fontSize: `${Math.max(12, cellSize * 0.5)}px`,
                   fontWeight: 'bold',
                   cursor: cell !== '.' ? 'pointer' : 'default',
                   outline: isFocused ? '2px solid #0066cc' : 'none',
@@ -225,7 +240,7 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }:
                     position: 'absolute',
                     top: '1px',
                     left: '2px',
-                    fontSize: '8px',
+                    fontSize: `${Math.max(7, cellSize * 0.24)}px`,
                     fontWeight: 'normal',
                     color: colors.clueNumColor
                   }}>
@@ -239,7 +254,7 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }:
         )}
       </div>
       
-      <div style={{ flex: 1, minWidth: '300px' }}>
+      <div style={{ flex: 1, minWidth: isMobile ? '100%' : '300px' }}>
         <div style={{ marginBottom: '1.5rem', border: `2px solid ${colors.acrossBorder}`, borderRadius: '6px', overflow: 'hidden' }}>
           <h3 style={{ 
             margin: 0, 
