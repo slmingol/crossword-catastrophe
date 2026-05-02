@@ -62,7 +62,7 @@ export default function Layout({ children }: LayoutProps) {
                 alignItems: 'center', 
                 gap: '0.75rem'
               }}>
-                <img src="/logo.png" alt="Crossword Catastrophe Logo" style={{ height: '2.5rem', width: 'auto' }} />
+                <img src="/logo.png" alt="Crossword Catastrophe Logo" style={{ height: '3.5rem', width: 'auto' }} />
                 <span style={{ fontSize: '1.5rem', fontWeight: 'bold', whiteSpace: 'nowrap' }}>Crossword Catastrophe</span>
               </Link>
               <Link to="/archive" style={{ 
