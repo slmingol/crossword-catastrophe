@@ -191,22 +191,82 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid }: {
       </div>
       
       <div style={{ flex: 1, minWidth: '300px' }}>
-        <div style={{ marginBottom: '1rem' }}>
-          <h3 style={{ marginBottom: '0.5rem', fontSize: '1rem' }}>Across</h3>
-          <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+        <div style={{ marginBottom: '1.5rem', border: '2px solid #0052cc', borderRadius: '6px', overflow: 'hidden' }}>
+          <h3 style={{ 
+            margin: 0, 
+            padding: '0.75rem 1rem', 
+            fontSize: '1.1rem', 
+            fontWeight: '700',
+            backgroundColor: '#0052cc', 
+            color: 'white',
+            letterSpacing: '0.5px'
+          }}>ACROSS</h3>
+          <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '0.5rem' }}>
             {Object.entries(puzzle.clues_across || {}).map(([num, clue]: [string, any]) => (
-              <div key={num} style={{ marginBottom: '0.5rem', padding: '0.4rem', backgroundColor: '#f5f5f5', borderRadius: '3px', fontSize: '0.9rem' }}>
-                <strong>{num}.</strong> {typeof clue === 'string' ? clue : clue.clue}
+              <div 
+                key={num} 
+                style={{ 
+                  marginBottom: '0.5rem', 
+                  padding: '0.6rem 0.75rem', 
+                  backgroundColor: 'white',
+                  border: '1px solid #deebff',
+                  borderLeft: '3px solid #0052cc',
+                  borderRadius: '4px', 
+                  fontSize: '0.9rem',
+                  transition: 'all 0.15s',
+                  cursor: 'pointer'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = '#deebff';
+                  e.currentTarget.style.transform = 'translateX(4px)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = 'white';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                }}
+              >
+                <strong style={{ color: '#0052cc', marginRight: '0.5rem' }}>{num}.</strong> 
+                <span>{typeof clue === 'string' ? clue : clue.clue}</span>
               </div>
             ))}
           </div>
         </div>
-        <div>
-          <h3 style={{ marginBottom: '0.5rem', fontSize: '1rem' }}>Down</h3>
-          <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+        <div style={{ border: '2px solid #00875a', borderRadius: '6px', overflow: 'hidden' }}>
+          <h3 style={{ 
+            margin: 0, 
+            padding: '0.75rem 1rem', 
+            fontSize: '1.1rem', 
+            fontWeight: '700',
+            backgroundColor: '#00875a', 
+            color: 'white',
+            letterSpacing: '0.5px'
+          }}>DOWN</h3>
+          <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '0.5rem' }}>
             {Object.entries(puzzle.clues_down || {}).map(([num, clue]: [string, any]) => (
-              <div key={num} style={{ marginBottom: '0.5rem', padding: '0.4rem', backgroundColor: '#f5f5f5', borderRadius: '3px', fontSize: '0.9rem' }}>
-                <strong>{num}.</strong> {typeof clue === 'string' ? clue : clue.clue}
+              <div 
+                key={num} 
+                style={{ 
+                  marginBottom: '0.5rem', 
+                  padding: '0.6rem 0.75rem', 
+                  backgroundColor: 'white',
+                  border: '1px solid #e3fcef',
+                  borderLeft: '3px solid #00875a',
+                  borderRadius: '4px', 
+                  fontSize: '0.9rem',
+                  transition: 'all 0.15s',
+                  cursor: 'pointer'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = '#e3fcef';
+                  e.currentTarget.style.transform = 'translateX(4px)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = 'white';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                }}
+              >
+                <strong style={{ color: '#00875a', marginRight: '0.5rem' }}>{num}.</strong> 
+                <span>{typeof clue === 'string' ? clue : clue.clue}</span>
               </div>
             ))}
           </div>
