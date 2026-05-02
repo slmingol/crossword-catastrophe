@@ -45,27 +45,49 @@ export default function Layout({ children }: LayoutProps) {
           padding: '0.75rem 2rem',
           boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
         }}>
-          <nav style={{ 
-            maxWidth: '1400px', 
-            margin: '0 auto', 
-            display: 'flex', 
-            gap: '1rem', 
-            alignItems: 'center', 
-            justifyContent: 'space-between',
-            flexWrap: 'nowrap',
-            minHeight: '2rem'
-          }}>
-            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'nowrap', minWidth: 0 }}>
-              <Link to="/" style={{ color: 'white', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}>
+          <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+            {/* Top row: Logo and game name centered */}
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              gap: '1.5rem',
+              paddingBottom: puzzleInfo ? '0.75rem' : '0',
+              borderBottom: puzzleInfo ? '1px solid #333' : 'none'
+            }}>
+              <Link to="/" style={{ 
+                color: 'white', 
+                textDecoration: 'none', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.75rem'
+              }}>
                 <img src="/logo.png" alt="Crossword Catastrophe Logo" style={{ height: '2.5rem', width: 'auto' }} />
-                <span style={{ fontSize: '1.3rem', fontWeight: 'bold' }}>Crossword Catastrophe</span>
+                <span style={{ fontSize: '1.5rem', fontWeight: 'bold', whiteSpace: 'nowrap' }}>Crossword Catastrophe</span>
               </Link>
-              <Link to="/archive" style={{ color: 'white', textDecoration: 'none', fontSize: '0.9rem', whiteSpace: 'nowrap' }}>
+              <Link to="/archive" style={{ 
+                color: '#ccc', 
+                textDecoration: 'none', 
+                fontSize: '0.95rem',
+                padding: '0.4rem 0.8rem',
+                borderRadius: '4px',
+                backgroundColor: '#2a2a2a',
+                transition: 'background-color 0.15s'
+              }}>
                 Archive
               </Link>
-              {puzzleInfo && (
-                <>
-                  <span style={{ color: '#666', margin: '0 0.25rem' }}>|</span>
+            </div>
+
+            {/* Second row: Puzzle navigation and info */}
+            {puzzleInfo && (
+              <nav style={{ 
+                display: 'flex', 
+                gap: '1rem', 
+                alignItems: 'center', 
+                justifyContent: 'space-between',
+                paddingTop: '0.75rem'
+              }}>
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flex: 1 }}>
                   {navigation && (
                     <button
                       onClick={navigation.onPrevious}
@@ -84,7 +106,7 @@ export default function Layout({ children }: LayoutProps) {
                       ←
                     </button>
                   )}
-                  <span style={{ fontSize: '0.9rem', fontWeight: '600', whiteSpace: 'nowrap', margin: '0 0.25rem' }}>{puzzleInfo.title}</span>
+                  <span style={{ fontSize: '0.95rem', fontWeight: '600', whiteSpace: 'nowrap' }}>{puzzleInfo.title}</span>
                   {navigation && (
                     <button
                       onClick={navigation.onNext}
@@ -103,14 +125,14 @@ export default function Layout({ children }: LayoutProps) {
                       →
                     </button>
                   )}
-                  <span style={{ color: '#ccc', fontSize: '0.8rem', whiteSpace: 'nowrap', marginLeft: '0.5rem' }}>
+                  <span style={{ color: '#ccc', fontSize: '0.85rem', whiteSpace: 'nowrap', marginLeft: '0.5rem' }}>
                     {puzzleInfo.author.replace('By ', '')} • {puzzleInfo.source} • {new Date(puzzleInfo.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}
                   </span>
-                </>
-              )}
-            </div>
-            {actions && <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0 }}>{actions}</div>}
-          </nav>
+                </div>
+                {actions && <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0 }}>{actions}</div>}
+              </nav>
+            )}
+          </div>
         </header>
         <main style={{ flex: 1, padding: '2rem', maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
           {children}
