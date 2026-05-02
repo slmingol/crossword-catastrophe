@@ -6,8 +6,8 @@ RUN apt-get update && apt-get install -y curl && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
 
-# Install xword-dl
-RUN pip install --no-cache-dir xword-dl
+# Install xword-dl from PR#331 (fixes Amuselabs)
+RUN pip install --no-cache-dir git+https://github.com/thisisparker/xword-dl.git@refs/pull/331/head
 
 WORKDIR /app
 
