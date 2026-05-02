@@ -351,7 +351,7 @@ export default function PuzzlePlay() {
       );
     }
     return () => setActions(null);
-  }, [puzzle, showSolution, setActions]);
+  }, [puzzle, showSolution, setActions, userGrid, timeSpent, startTime, id]);
 
   if (loading) {
     return <div style={{ textAlign: 'center', padding: '4rem' }}>Loading puzzle...</div>;
