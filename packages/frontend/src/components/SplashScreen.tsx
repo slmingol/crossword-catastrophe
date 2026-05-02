@@ -72,7 +72,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           src="/logo.png"
           alt="Crossword Catastrophe"
           style={{
-            width: animationPhase === 'move' ? '3.5rem' : '30rem',
+            width: animationPhase === 'move' ? '3.5rem' : '45rem',
             height: 'auto',
             transition: 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)',
           }}
