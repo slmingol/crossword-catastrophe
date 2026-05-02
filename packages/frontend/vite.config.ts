@@ -24,8 +24,6 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
-    hmr: {
-      clientPort: 3000,
-    },
+    hmr: false, // Disable HMR to prevent constant reloads in production
   },
 });

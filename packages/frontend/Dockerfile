@@ -20,4 +20,5 @@ COPY packages/frontend/src ./packages/frontend/src
 
 EXPOSE 3000
 
-CMD ["npm", "run", "dev", "--workspace=frontend", "--", "--host"]
+# Run dev server (host and HMR configured in vite.config.ts)
+CMD ["npm", "run", "dev", "--workspace=frontend"]
