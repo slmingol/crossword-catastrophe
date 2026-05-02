@@ -1,0 +1,33 @@
+services:
+  backend:
+    image: ghcr.io/slmingol/crossword-catastrophe-backend:latest
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_PATH: /app/data/crossword.db
+    volumes:
+      - puzzle_data:/app/data
+    restart: unless-stopped
+
+  scraper:
+    image: ghcr.io/slmingol/crossword-catastrophe-scraper:latest
+    environment:
+      DATABASE_PATH: /app/data/crossword.db
+      SCRAPE_SCHEDULE: "0 6 * * *"
+    volumes:
+      - puzzle_data:/app/data
+    restart: unless-stopped
+
+  frontend:
+    image: ghcr.io/slmingol/crossword-catastrophe-frontend:latest
+    ports:
+      - "3000:3000"
+    environment:
+      VITE_API_URL: http://localhost:3001/api
+    restart: unless-stopped
+
+volumes:
+  puzzle_data:
+    external: false

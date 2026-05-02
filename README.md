@@ -56,6 +56,25 @@ docker-compose up -d
 
 The first time you run it, the scraper will download today's puzzles from all sources.
 
+### Production Deployment
+
+For production deployments using pre-built images from GitHub Container Registry:
+
+```bash
+# Use the production compose file
+docker-compose -f docker-compose.prod.yml up -d
+
+# Or pull and run specific versions
+docker-compose -f docker-compose.prod.yml pull
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+The production configuration uses:
+- Pre-built multi-platform images (amd64/arm64)
+- Production environment settings
+- Auto-restart policies
+- No source code volume mounts
+
 ## 🐳 Using Pre-built Container Images
 
 Pre-built multi-platform (amd64/arm64) containers are available from GitHub Container Registry:
