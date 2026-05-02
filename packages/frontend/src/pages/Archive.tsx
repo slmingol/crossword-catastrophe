@@ -162,6 +162,29 @@ export default function Archive() {
           {data?.pagination.total || 0} puzzles
         </span>
       </div>
+
+      {/* Legend */}
+      <div style={{
+        marginBottom: '1.5rem',
+        padding: '0.5rem 1rem',
+        backgroundColor: '#f8f9fa',
+        borderRadius: '4px',
+        fontSize: '0.8rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '1.5rem',
+        color: '#666'
+      }}>
+        <span style={{ fontWeight: '600' }}>Progress indicators:</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <span style={{ color: '#28a745', fontSize: '1rem' }}>✓</span>
+          <span>Completed</span>
+        </span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <span style={{ color: '#ffc107', fontSize: '0.8rem' }}>●</span>
+          <span>In progress</span>
+        </span>
+      </div>
       
       {data && data.puzzles.length > 0 ? (
         <>
