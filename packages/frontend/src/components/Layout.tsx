@@ -28,7 +28,17 @@ export default function Layout({ children }: LayoutProps) {
     const now = Date.now();
     const fourHours = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
     
-    if (!lastSplashTime || now - parseInt(lastSplashTime) > fourHours) {
+    // Check for reset parameter in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const forceReset = urlParams.has('reset-splash');
+    
+    if (forceReset) {
+      localStorage.removeItem('lastSplashTime');
+      setShowSplash(true);
+      localStorage.setItem('lastSplashTime', now.toString());
+      // Remove the parameter from URL
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (!lastSplashTime || now - parseInt(lastSplashTime) > fourHours) {
       setShowSplash(true);
       localStorage.setItem('lastSplashTime', now.toString());
     }
