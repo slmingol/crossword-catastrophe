@@ -1,6 +1,7 @@
 import { ReactNode, useEffect, useState, createContext, useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { api } from '../api/client';
+import SplashScreen from './SplashScreen';
 
 interface LayoutProps {
   children: ReactNode;
@@ -19,6 +20,23 @@ export default function Layout({ children }: LayoutProps) {
   const [puzzleInfo, setPuzzleInfo] = useState<any>(null);
   const [actions, setActions] = useState<ReactNode>(null);
   const [navigation, setNavigation] = useState<{ onPrevious?: () => void; onNext?: () => void; hasPrevious: boolean; hasNext: boolean } | null>(null);
+  const [showSplash, setShowSplash] = useState(false);
+  
+  // Check if splash screen should be shown
+  useEffect(() => {
+    const lastSplashTime = localStorage.getItem('lastSplashTime');
+    const now = Date.now();
+    const fourHours = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
+    
+    if (!lastSplashTime || now - parseInt(lastSplashTime) > fourHours) {
+      setShowSplash(true);
+      localStorage.setItem('lastSplashTime', now.toString());
+    }
+  }, []);
+
+  const handleSplashComplete = () => {
+    setShowSplash(false);
+  };
   
   // Extract puzzle ID from URL
   const puzzleMatch = location.pathname.match(/\/puzzle\/(\d+)/);
@@ -38,6 +56,7 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <PuzzleActionsContext.Provider value={{ setActions, setNavigation }}>
+      {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <header style={{
           backgroundColor: '#1a1a1a',
