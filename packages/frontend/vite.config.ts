@@ -15,6 +15,8 @@ export default defineConfig({
       '.bub.lan', // Allow all *.bub.lan domains
       'crosscat.lamolabs.org',
       '.lamolabs.org', // Allow all *.lamolabs.org domains
+      'crosscat.svcs.lamolabs.com',
+      '.lamolabs.com', // Allow all *.lamolabs.com domains
     ],
     proxy: {
       '/api': {
