@@ -62,7 +62,41 @@ export default function Archive() {
 
   return (
     <div>
-      <h1 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>Puzzle Archive</h1>
+      <h1 style={{ marginBottom: '0.5rem', fontSize: '1.5rem' }}>Puzzle Archive</h1>
+      
+      {/* Legend */}
+      <div style={{ 
+        marginBottom: '1.5rem', 
+        padding: '0.75rem 1rem', 
+        backgroundColor: '#f8f9fa',
+        borderRadius: '4px',
+        fontSize: '0.85rem'
+      }}>
+        <span style={{ fontWeight: '600', marginRight: '1rem', color: '#666' }}>Sources:</span>
+        {Object.entries(SOURCE_CONFIG).map(([name, config]) => (
+          <span key={name} style={{ display: 'inline-flex', alignItems: 'center', marginRight: '1.5rem' }}>
+            <span
+              style={{
+                display: 'inline-block',
+                fontSize: '0.65rem',
+                fontWeight: '700',
+                padding: '0.2rem 0.4rem',
+                borderRadius: '3px',
+                backgroundColor: config.bg,
+                color: config.color,
+                marginRight: '0.4rem',
+                minWidth: '36px',
+                textAlign: 'center',
+                letterSpacing: '0.3px'
+              }}
+            >
+              {config.abbr}
+            </span>
+            <span style={{ color: '#666' }}>{name}</span>
+          </span>
+        ))}
+      </div>
+      
       {data && data.puzzles.length > 0 ? (
         <>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
