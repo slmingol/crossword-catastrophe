@@ -1,13 +1,75 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Crossword } from '@guardian/react-crossword';
 import { api, Puzzle } from '../api/client';
+
+// Temporary simple crossword display
+function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
+  const solution = puzzle.grid_data?.solution || [];
+  const width = puzzle.grid_data?.width || 15;
+  const height = puzzle.grid_data?.height || 15;
+
+  return (
+    <div>
+      <div style={{ 
+        display: 'inline-grid',
+        gridTemplateColumns: `repeat(${width}, 40px)`,
+        gap: 0,
+        border: '2px solid #000',
+        marginBottom: '2rem'
+      }}>
+        {solution.map((row: string[], rowIdx: number) => 
+          row.map((cell: string, colIdx: number) => (
+            <div
+              key={`${rowIdx}-${colIdx}`}
+              style={{
+                width: '40px',
+                height: '40px',
+                border: '1px solid #999',
+                backgroundColor: cell === '.' ? '#000' : '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '20px',
+                fontWeight: 'bold',
+                cursor: cell !== '.' ? 'pointer' : 'default'
+              }}
+            >
+              {cell !== '.' && cell !== '' ? cell : ''}
+            </div>
+          ))
+        )}
+      </div>
+      
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+        <div>
+          <h3>Across</h3>
+          <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
+            {Object.entries(puzzle.clues_across || {}).map(([num, clue]: [string, any]) => (
+              <div key={num} style={{ marginBottom: '0.75rem', padding: '0.5rem', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+                <strong>{num}.</strong> {typeof clue === 'string' ? clue : clue.clue}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div>
+          <h3>Down</h3>
+          <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
+            {Object.entries(puzzle.clues_down || {}).map(([num, clue]: [string, any]) => (
+              <div key={num} style={{ marginBottom: '0.75rem', padding: '0.5rem', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+                <strong>{num}.</strong> {typeof clue === 'string' ? clue : clue.clue}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function PuzzlePlay() {
   const { id } = useParams<{ id: string }>();
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [loading, setLoading] = useState(true);
-  const [startTime] = useState(Date.now());
 
   useEffect(() => {
     if (id) {
@@ -18,13 +80,6 @@ export default function PuzzlePlay() {
     }
   }, [id]);
 
-  const handleSave = (data: any) => {
-    if (puzzle) {
-      const timeSpent = Math.floor((Date.now() - startTime) / 1000);
-      api.saveProgress(puzzle.id, data, false, timeSpent).catch(console.error);
-    }
-  };
-
   if (loading) {
     return <div style={{ textAlign: 'center', padding: '4rem' }}>Loading puzzle...</div>;
   }
@@ -32,84 +87,6 @@ export default function PuzzlePlay() {
   if (!puzzle) {
     return <div style={{ textAlign: 'center', padding: '4rem' }}>Puzzle not found</div>;
   }
-
-  // Calculate clue positions from grid
-  const calculatePositions = () => {
-    const solution = puzzle.grid_data?.solution || [];
-    const width = puzzle.grid_data?.width || 15;
-    const height = puzzle.grid_data?.height || 15;
-    const positions: Record<number, { x: number; y: number }> = {};
-    
-    let clueNum = 1;
-    for (let row = 0; row < height; row++) {
-      for (let col = 0; col < width; col++) {
-        if (!solution[row] || solution[row][col] === '.') continue;
-        
-        const hasAcross = (col === 0 || solution[row][col - 1] === '.') && 
-                         col < width - 1 && solution[row][col + 1] !== '.';
-        const hasDown = (row === 0 || solution[row - 1][col] === '.') && 
-                       row < height - 1 && solution[row + 1][col] !== '.';
-        
-        if (hasAcross || hasDown) {
-          positions[clueNum] = { x: col, y: row };
-          clueNum++;
-        }
-      }
-    }
-    return positions;
-  };
-
-  const positions = calculatePositions();
-
-  // Transform puzzle data to Guardian crossword format
-  const crosswordData = {
-    id: puzzle.id.toString(),
-    number: puzzle.id,
-    name: puzzle.title,
-    creator: { name: puzzle.author },
-    date: new Date(puzzle.date).getTime(),
-    entries: [
-      ...Object.entries(puzzle.clues_across || {}).map(([num, clue]: [string, any]) => {
-        const clueData = typeof clue === 'string' ? { clue, answer: '', length: 0 } : clue;
-        const pos = positions[parseInt(num)] || { x: 0, y: 0 };
-        return {
-          id: `${num}-across`,
-          number: parseInt(num),
-          humanNumber: num,
-          clue: clueData.clue,
-          direction: 'across' as const,
-          length: clueData.length || clueData.answer?.length || 0,
-          group: [`${num}-across`],
-          position: pos,
-          separatorLocations: {},
-          solution: clueData.answer || '',
-        };
-      }),
-      ...Object.entries(puzzle.clues_down || {}).map(([num, clue]: [string, any]) => {
-        const clueData = typeof clue === 'string' ? { clue, answer: '', length: 0 } : clue;
-        const pos = positions[parseInt(num)] || { x: 0, y: 0 };
-        return {
-          id: `${num}-down`,
-          number: parseInt(num),
-          humanNumber: num,
-          clue: clueData.clue,
-          direction: 'down' as const,
-          length: clueData.length || clueData.answer?.length || 0,
-          group: [`${num}-down`],
-          position: pos,
-          separatorLocations: {},
-          solution: clueData.answer || '',
-        };
-      }),
-    ],
-    solutionAvailable: false,
-    dateSolutionAvailable: 0,
-    dimensions: {
-      cols: puzzle.grid_data?.width || 15,
-      rows: puzzle.grid_data?.height || 15,
-    },
-    crosswordType: 'quick' as const,
-  };
 
   return (
     <div>
@@ -131,6 +108,9 @@ export default function PuzzlePlay() {
         <p style={{ color: '#888', fontSize: '0.9rem' }}>
           {new Date(puzzle.date).toLocaleDateString()}
         </p>
+        <p style={{ color: '#f60', fontSize: '0.9rem', fontStyle: 'italic', marginTop: '1rem' }}>
+          Note: Interactive puzzle coming soon - currently showing solution
+        </p>
       </div>
       <div style={{
         backgroundColor: 'white',
@@ -138,10 +118,7 @@ export default function PuzzlePlay() {
         borderRadius: '8px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
       }}>
-        <Crossword
-          data={crosswordData}
-          onCellChange={handleSave}
-        />
+        <SimpleCrossword puzzle={puzzle} />
       </div>
     </div>
   );
