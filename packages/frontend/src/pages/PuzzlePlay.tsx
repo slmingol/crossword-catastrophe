@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { api, Puzzle } from '../api/client';
+import { usePuzzleActions } from '../components/Layout';
 
-// Interactive crossword display - v5 black toolbar
+// Interactive crossword display - v6 nav integration
 function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid }: { 
   puzzle: Puzzle, 
   showSolution: boolean,
@@ -224,6 +225,7 @@ export default function PuzzlePlay() {
   const [error, setError] = useState<string | null>(null);
   const [showSolution, setShowSolution] = useState(false);
   const [userGrid, setUserGrid] = useState<string[][]>([]);
+  const { setActions } = usePuzzleActions();
 
   console.log('PuzzlePlay render:', { id, loading, hasPuzzle: !!puzzle });
 
@@ -262,6 +264,39 @@ export default function PuzzlePlay() {
     alert(`${correct} correct out of ${total}`);
   };
 
+  // Set actions in nav bar
+  useEffect(() => {
+    if (puzzle) {
+      setActions(
+        <>
+          <button onClick={checkAnswers} style={{
+            padding: '0.3rem 0.6rem',
+            backgroundColor: '#0066cc',
+            color: 'white',
+            border: 'none',
+            borderRadius: '3px',
+            cursor: 'pointer',
+            fontSize: '0.8rem'
+          }}>
+            Check
+          </button>
+          <button onClick={() => setShowSolution(!showSolution)} style={{
+            padding: '0.3rem 0.6rem',
+            backgroundColor: '#555',
+            color: 'white',
+            border: 'none',
+            borderRadius: '3px',
+            cursor: 'pointer',
+            fontSize: '0.8rem'
+          }}>
+            {showSolution ? 'Hide' : 'Show'}
+          </button>
+        </>
+      );
+    }
+    return () => setActions(null);
+  }, [puzzle, showSolution, setActions]);
+
   if (loading) {
     return <div style={{ textAlign: 'center', padding: '4rem' }}>Loading puzzle...</div>;
   }
@@ -275,32 +310,14 @@ export default function PuzzlePlay() {
   }
 
   return (
-    <div>
-      <div style={{ marginBottom: '0.5rem', display: 'flex', gap: '0.4rem' }}>
-        <button onClick={checkAnswers} style={{
-          padding: '0.3rem 0.6rem',
-          backgroundColor: '#0066cc',
-          color: 'white',
-          border: 'none',
-          borderRadius: '3px',
-          cursor: 'pointer',
-          fontSize: '0.8rem'
-        }}>
-          Check
-        </button>
-        <button onClick={() => setShowSolution(!showSolution)} style={{
-          padding: '0.3rem 0.6rem',
-          backgroundColor: '#555',
-          color: 'white',
-          border: 'none',
-          borderRadius: '3px',
-          cursor: 'pointer',
-          fontSize: '0.8rem'
-        }}>
-          {showSolution ? 'Hide' : 'Show'}
-        </button>
-      </div>
-      <div style={{
+    <SimpleCrossword 
+      puzzle={puzzle} 
+      showSolution={showSolution}
+      userGrid={userGrid}
+      setUserGrid={setUserGrid}
+    />
+  );
+}
         backgroundColor: 'white',
         padding: '0.75rem',
         borderRadius: '4px',
