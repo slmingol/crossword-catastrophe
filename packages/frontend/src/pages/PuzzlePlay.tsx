@@ -1,14 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api, Puzzle } from '../api/client';
-import { usePuzzleActions } from '../components/Layout';
+import { usePuzzleActions, useTheme } from '../components/Layout';
 
 // Interactive crossword display - v7 buttons in top nav
-function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid }: { 
+function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }: { 
   puzzle: Puzzle, 
   showSolution: boolean,
   userGrid: string[][],
-  setUserGrid: React.Dispatch<React.SetStateAction<string[][]>>
+  setUserGrid: React.Dispatch<React.SetStateAction<string[][]>>,
+  theme: 'light' | 'dark'
 }) {
   const solution = puzzle.grid_data?.solution || [];
   const width = puzzle.grid_data?.width || 15;
@@ -16,6 +17,55 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid }: {
 
   const [focusedCell, setFocusedCell] = useState<{row: number, col: number} | null>(null);
   const cellRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  // Theme colors
+  const colors = theme === 'dark' ? {
+    cellBg: '#2a2a2a',
+    cellText: '#e0e0e0',
+    cellBorder: '#444',
+    cellBlack: '#000',
+    cellFocused: '#4a4a00',
+    cellSolution: '#1a3a4a',
+    cellCorrect: '#1a3a1a',
+    cellWrong: '#3a1a1a',
+    clueNumColor: '#999',
+    gridBorder: '#444',
+    acrossBorder: '#0052cc',
+    acrossBg: '#0052cc',
+    acrossClue: '#2a2a2a',
+    acrossClueHover: '#3a3a3a',
+    acrossClueText: '#e0e0e0',
+    acrossClueNum: '#4a9eff',
+    downBorder: '#00875a',
+    downBg: '#00875a',
+    downClue: '#2a2a2a',
+    downClueHover: '#3a3a3a',
+    downClueText: '#e0e0e0',
+    downClueNum: '#2adf9a',
+  } : {
+    cellBg: '#fff',
+    cellText: '#000',
+    cellBorder: '#999',
+    cellBlack: '#000',
+    cellFocused: '#ffffcc',
+    cellSolution: '#e6f7ff',
+    cellCorrect: '#d4edda',
+    cellWrong: '#f8d7da',
+    clueNumColor: '#333',
+    gridBorder: '#000',
+    acrossBorder: '#0052cc',
+    acrossBg: '#0052cc',
+    acrossClue: 'white',
+    acrossClueHover: '#deebff',
+    acrossClueText: '#000',
+    acrossClueNum: '#0052cc',
+    downBorder: '#00875a',
+    downBg: '#00875a',
+    downClue: 'white',
+    downClueHover: '#e3fcef',
+    downClueText: '#000',
+    downClueNum: '#00875a',
+  };
 
   // Auto-focus cell when focusedCell changes
   useEffect(() => {
@@ -127,7 +177,7 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid }: {
           gridTemplateColumns: `repeat(${width}, 34px)`,
           gridTemplateRows: `repeat(${height}, 34px)`,
           gap: 0,
-          border: '2px solid #000',
+          border: `2px solid ${colors.gridBorder}`,
           width: `${width * 34 + 4}px`, // Explicit width: cells + border
           height: `${height * 34 + 4}px`, // Explicit height: cells + border
           flexShrink: 0
@@ -152,13 +202,14 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid }: {
                 style={{
                   width: '34px',
                   height: '34px',
-                  border: '1px solid #999',
-                  backgroundColor: cell === '.' ? '#000' : 
-                                   isFocused ? '#ffffcc' : 
-                                   showSolution ? '#e6f7ff' :
-                                   isCorrect ? '#d4edda' :
-                                   isWrong ? '#f8d7da' :
-                                   '#fff',
+                  border: `1px solid ${colors.cellBorder}`,
+                  backgroundColor: cell === '.' ? colors.cellBlack : 
+                                   isFocused ? colors.cellFocused : 
+                                   showSolution ? colors.cellSolution :
+                                   isCorrect ? colors.cellCorrect :
+                                   isWrong ? colors.cellWrong :
+                                   colors.cellBg,
+                  color: colors.cellText,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -176,7 +227,7 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid }: {
                     left: '2px',
                     fontSize: '8px',
                     fontWeight: 'normal',
-                    color: '#333'
+                    color: colors.clueNumColor
                   }}>
                     {clueNum}
                   </span>
@@ -189,13 +240,13 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid }: {
       </div>
       
       <div style={{ flex: 1, minWidth: '300px' }}>
-        <div style={{ marginBottom: '1.5rem', border: '2px solid #0052cc', borderRadius: '6px', overflow: 'hidden' }}>
+        <div style={{ marginBottom: '1.5rem', border: `2px solid ${colors.acrossBorder}`, borderRadius: '6px', overflow: 'hidden' }}>
           <h3 style={{ 
             margin: 0, 
             padding: '0.75rem 1rem', 
             fontSize: '1.1rem', 
             fontWeight: '700',
-            backgroundColor: '#0052cc', 
+            backgroundColor: colors.acrossBg, 
             color: 'white',
             letterSpacing: '0.5px'
           }}>ACROSS</h3>
@@ -206,36 +257,37 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid }: {
                 style={{ 
                   marginBottom: '0.5rem', 
                   padding: '0.6rem 0.75rem', 
-                  backgroundColor: 'white',
-                  border: '1px solid #deebff',
-                  borderLeft: '3px solid #0052cc',
+                  backgroundColor: colors.acrossClue,
+                  color: colors.acrossClueText,
+                  border: `1px solid ${colors.acrossClueHover}`,
+                  borderLeft: `3px solid ${colors.acrossBorder}`,
                   borderRadius: '4px', 
                   fontSize: '0.9rem',
                   transition: 'all 0.15s',
                   cursor: 'pointer'
                 }}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = '#deebff';
+                  e.currentTarget.style.backgroundColor = colors.acrossClueHover;
                   e.currentTarget.style.transform = 'translateX(4px)';
                 }}
                 onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = 'white';
+                  e.currentTarget.style.backgroundColor = colors.acrossClue;
                   e.currentTarget.style.transform = 'translateX(0)';
                 }}
               >
-                <strong style={{ color: '#0052cc', marginRight: '0.5rem' }}>{num}.</strong> 
+                <strong style={{ color: colors.acrossClueNum, marginRight: '0.5rem' }}>{num}.</strong> 
                 <span>{typeof clue === 'string' ? clue : clue.clue}</span>
               </div>
             ))}
           </div>
         </div>
-        <div style={{ border: '2px solid #00875a', borderRadius: '6px', overflow: 'hidden' }}>
+        <div style={{ border: `2px solid ${colors.downBorder}`, borderRadius: '6px', overflow: 'hidden' }}>
           <h3 style={{ 
             margin: 0, 
             padding: '0.75rem 1rem', 
             fontSize: '1.1rem', 
             fontWeight: '700',
-            backgroundColor: '#00875a', 
+            backgroundColor: colors.downBg, 
             color: 'white',
             letterSpacing: '0.5px'
           }}>DOWN</h3>
@@ -246,24 +298,25 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid }: {
                 style={{ 
                   marginBottom: '0.5rem', 
                   padding: '0.6rem 0.75rem', 
-                  backgroundColor: 'white',
-                  border: '1px solid #e3fcef',
-                  borderLeft: '3px solid #00875a',
+                  backgroundColor: colors.downClue,
+                  color: colors.downClueText,
+                  border: `1px solid ${colors.downClueHover}`,
+                  borderLeft: `3px solid ${colors.downBorder}`,
                   borderRadius: '4px', 
                   fontSize: '0.9rem',
                   transition: 'all 0.15s',
                   cursor: 'pointer'
                 }}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = '#e3fcef';
+                  e.currentTarget.style.backgroundColor = colors.downClueHover;
                   e.currentTarget.style.transform = 'translateX(4px)';
                 }}
                 onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = 'white';
+                  e.currentTarget.style.backgroundColor = colors.downClue;
                   e.currentTarget.style.transform = 'translateX(0)';
                 }}
               >
-                <strong style={{ color: '#00875a', marginRight: '0.5rem' }}>{num}.</strong> 
+                <strong style={{ color: colors.downClueNum, marginRight: '0.5rem' }}>{num}.</strong> 
                 <span>{typeof clue === 'string' ? clue : clue.clue}</span>
               </div>
             ))}
@@ -279,6 +332,7 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid }: {
 export default function PuzzlePlay() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { theme } = useTheme();
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -499,6 +553,7 @@ export default function PuzzlePlay() {
         showSolution={showSolution}
         userGrid={userGrid}
         setUserGrid={setUserGrid}
+        theme={theme}
       />
     </div>
   );
