@@ -25,5 +25,6 @@ services:
     ports:
       - "9998:3000"
     environment:
-      VITE_API_URL: http://localhost:9999/api
+      # Override this with your actual hostname
+      VITE_API_URL: ${API_URL:-http://localhost:9999/api}
     restart: unless-stopped

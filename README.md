@@ -64,12 +64,21 @@ For production deployments using pre-built images from GitHub Container Registry
 # Create data directory for SQLite database
 mkdir -p data
 
+# Configure API URL for your hostname
+cp .env.production.example .env
+# Edit .env and set API_URL to your server's hostname:
+# API_URL=http://your-server.com:9999/api
+
 # Start production services
 ./scripts/run-prod.sh
 
 # Or use docker compose directly
 docker-compose -f docker-compose.prod.yml up -d
 ```
+
+**Important:** The frontend needs to know where the backend API is. Set the `API_URL` environment variable in `.env` to match your server's hostname. For example:
+- Local: `API_URL=http://localhost:9999/api`
+- Remote: `API_URL=http://docker-host-01.bub.lan:9999/api`
 
 **Production control script:**
 ```bash
