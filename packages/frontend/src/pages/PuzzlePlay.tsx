@@ -145,24 +145,26 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
 
   return (
     <div>
-      <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem' }}>
+      <div style={{ marginBottom: '0.75rem', display: 'flex', gap: '0.5rem' }}>
         <button onClick={checkAnswers} style={{
-          padding: '0.5rem 1rem',
+          padding: '0.4rem 0.8rem',
           backgroundColor: '#0066cc',
           color: 'white',
           border: 'none',
           borderRadius: '4px',
-          cursor: 'pointer'
+          cursor: 'pointer',
+          fontSize: '0.9rem'
         }}>
           Check Answers
         </button>
         <button onClick={() => setShowSolution(!showSolution)} style={{
-          padding: '0.5rem 1rem',
+          padding: '0.4rem 0.8rem',
           backgroundColor: '#666',
           color: 'white',
           border: 'none',
           borderRadius: '4px',
-          cursor: 'pointer'
+          cursor: 'pointer',
+          fontSize: '0.9rem'
         }}>
           {showSolution ? 'Hide' : 'Reveal'} Solution
         </button>
@@ -232,21 +234,21 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
       </div>
       
       <div style={{ flex: 1, minWidth: '300px' }}>
-        <div style={{ marginBottom: '2rem' }}>
-          <h3 style={{ marginBottom: '1rem' }}>Across</h3>
+        <div style={{ marginBottom: '1rem' }}>
+          <h3 style={{ marginBottom: '0.5rem', fontSize: '1rem' }}>Across</h3>
           <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
             {Object.entries(puzzle.clues_across || {}).map(([num, clue]: [string, any]) => (
-              <div key={num} style={{ marginBottom: '0.75rem', padding: '0.5rem', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+              <div key={num} style={{ marginBottom: '0.5rem', padding: '0.4rem', backgroundColor: '#f5f5f5', borderRadius: '3px', fontSize: '0.9rem' }}>
                 <strong>{num}.</strong> {typeof clue === 'string' ? clue : clue.clue}
               </div>
             ))}
           </div>
         </div>
         <div>
-          <h3 style={{ marginBottom: '1rem' }}>Down</h3>
+          <h3 style={{ marginBottom: '0.5rem', fontSize: '1rem' }}>Down</h3>
           <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
             {Object.entries(puzzle.clues_down || {}).map(([num, clue]: [string, any]) => (
-              <div key={num} style={{ marginBottom: '0.75rem', padding: '0.5rem', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+              <div key={num} style={{ marginBottom: '0.5rem', padding: '0.4rem', backgroundColor: '#f5f5f5', borderRadius: '3px', fontSize: '0.9rem' }}>
                 <strong>{num}.</strong> {typeof clue === 'string' ? clue : clue.clue}
               </div>
             ))}
@@ -298,30 +300,30 @@ export default function PuzzlePlay() {
 
   return (
     <div>
-      <div style={{ marginBottom: '2rem' }}>
-        <Link to="/" style={{ color: '#0066cc', textDecoration: 'none' }}>← Back</Link>
+      <div style={{ marginBottom: '0.75rem' }}>
+        <Link to="/" style={{ color: '#0066cc', textDecoration: 'none', fontSize: '0.9rem' }}>← Back</Link>
       </div>
       <div style={{
         backgroundColor: 'white',
-        padding: '2rem',
-        borderRadius: '8px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        marginBottom: '2rem'
+        padding: '1rem',
+        borderRadius: '6px',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+        marginBottom: '1rem'
       }}>
-        <h1 style={{ marginBottom: '0.5rem' }}>{puzzle.title}</h1>
-        <p style={{ color: '#666' }}>
+        <h1 style={{ marginBottom: '0.25rem', fontSize: '1.5rem' }}>{puzzle.title}</h1>
+        <p style={{ color: '#666', fontSize: '0.85rem', marginBottom: '0.25rem' }}>
           By {puzzle.author} • {puzzle.source}
           {puzzle.difficulty && ` • ${puzzle.difficulty}`}
         </p>
-        <p style={{ color: '#888', fontSize: '0.9rem' }}>
+        <p style={{ color: '#888', fontSize: '0.8rem' }}>
           {new Date(puzzle.date).toLocaleDateString()}
         </p>
       </div>
       <div style={{
         backgroundColor: 'white',
-        padding: '2rem',
-        borderRadius: '8px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        padding: '1rem',
+        borderRadius: '6px',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.1)'
       }}>
         <SimpleCrossword puzzle={puzzle} />
       </div>
