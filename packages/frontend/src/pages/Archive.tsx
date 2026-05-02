@@ -4,11 +4,11 @@ import { api, Puzzle, PuzzleListResponse, UserProgress } from '../api/client';
 import { format } from 'date-fns';
 
 // Source badge colors and abbreviations
-const SOURCE_CONFIG: Record<string, { abbr: string; color: string; bg: string }> = {
-  'USA Today': { abbr: 'USA', color: '#0052cc', bg: '#deebff' },
-  'Universal Crossword': { abbr: 'UNI', color: '#6554c0', bg: '#eae6ff' },
-  'Los Angeles Times': { abbr: 'LAT', color: '#00875a', bg: '#e3fcef' },
-  'Newsday': { abbr: 'ND', color: '#ff5630', bg: '#ffebe6' },
+const SOURCE_CONFIG: Record<string, { abbr: string; color: string; bg: string; description: string }> = {
+  'USA Today': { abbr: 'USA', color: '#0052cc', bg: '#deebff', description: 'Daily puzzles from USA Today' },
+  'Universal Crossword': { abbr: 'UNI', color: '#6554c0', bg: '#eae6ff', description: 'Universal syndicated crosswords' },
+  'Los Angeles Times': { abbr: 'LAT', color: '#00875a', bg: '#e3fcef', description: 'LA Times daily crosswords' },
+  'Newsday': { abbr: 'ND', color: '#ff5630', bg: '#ffebe6', description: 'Newsday crossword puzzles' },
 };
 
 function SourceBadge({ source }: { source: string }) {
@@ -91,7 +91,7 @@ export default function Archive() {
         display: 'flex',
         alignItems: 'center',
         flexWrap: 'wrap',
-        gap: '0.5rem'
+        gap: '0.75rem'
       }}>
         <span style={{ fontWeight: '600', color: '#666', marginRight: '0.5rem' }}>Filter:</span>
         {Object.entries(SOURCE_CONFIG).map(([name, config]) => {
@@ -100,24 +100,36 @@ export default function Archive() {
             <button
               key={name}
               onClick={() => toggleSource(name)}
-              title={name}
               style={{
                 display: 'inline-flex',
+                flexDirection: 'column',
                 alignItems: 'center',
-                padding: '0.3rem 0.5rem',
+                padding: '0.4rem 0.6rem',
                 border: `2px solid ${isSelected ? config.color : '#ddd'}`,
-                borderRadius: '4px',
+                borderRadius: '6px',
                 backgroundColor: isSelected ? config.bg : 'white',
                 cursor: 'pointer',
                 transition: 'all 0.15s',
                 opacity: isSelected ? 1 : 0.5,
+                gap: '0.15rem'
+              }}
+            >
+              <span style={{
                 fontSize: '0.7rem',
                 fontWeight: '700',
                 letterSpacing: '0.3px',
                 color: config.color
-              }}
-            >
-              {config.abbr}
+              }}>
+                {config.abbr}
+              </span>
+              <span style={{
+                fontSize: '0.65rem',
+                color: '#666',
+                textAlign: 'center',
+                lineHeight: '1.2'
+              }}>
+                {config.description}
+              </span>
             </button>
           );
         })}
