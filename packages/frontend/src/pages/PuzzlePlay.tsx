@@ -15,6 +15,30 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
   const [focusedCell, setFocusedCell] = useState<{row: number, col: number} | null>(null);
   const [showSolution, setShowSolution] = useState(false);
 
+  console.log('SimpleCrossword state:', { 
+    showSolution, 
+    userGridEmpty: userGrid[0]?.[0] === '',
+    firstUserCell: userGrid[0]?.[0]
+  });
+
+  // Calculate clue numbers for grid
+  const clueNumbers: (number | null)[][] = solution.map(() => Array(width).fill(null));
+  let clueNum = 1;
+  for (let row = 0; row < height; row++) {
+    for (let col = 0; col < width; col++) {
+      if (solution[row][col] === '.') continue;
+      
+      const hasAcross = (col === 0 || solution[row][col - 1] === '.') && 
+                       col < width - 1 && solution[row][col + 1] !== '.';
+      const hasDown = (row === 0 || !solution[row - 1] || solution[row - 1][col] === '.') && 
+                     row < height - 1 && solution[row + 1] && solution[row + 1][col] !== '.';
+      
+      if (hasAcross || hasDown) {
+        clueNumbers[row][col] = clueNum++;
+      }
+    }
+  }
+
   const handleCellClick = (rowIdx: number, colIdx: number) => {
     if (solution[rowIdx][colIdx] !== '.') {
       setFocusedCell({ row: rowIdx, col: colIdx });
@@ -109,6 +133,7 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
             const displayValue = showSolution ? cell : userValue;
             const isCorrect = userValue && userValue === cell;
             const isWrong = userValue && userValue !== cell && userValue !== '';
+            const clueNum = clueNumbers[rowIdx][colIdx];
             
             return (
               <div
@@ -133,9 +158,22 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
                   fontSize: '20px',
                   fontWeight: 'bold',
                   cursor: cell !== '.' ? 'pointer' : 'default',
-                  outline: isFocused ? '2px solid #0066cc' : 'none'
+                  outline: isFocused ? '2px solid #0066cc' : 'none',
+                  position: 'relative'
                 }}
               >
+                {clueNum && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '2px',
+                    left: '2px',
+                    fontSize: '10px',
+                    fontWeight: 'normal',
+                    color: '#333'
+                  }}>
+                    {clueNum}
+                  </span>
+                )}
                 {cell !== '.' ? displayValue : ''}
               </div>
             );
