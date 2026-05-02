@@ -77,8 +77,8 @@ docker-compose -f docker-compose.prod.yml up -d
 ```
 
 **Important:** The frontend needs to know where the backend API is. Set the `API_URL` environment variable in `.env` to match your server's hostname. For example:
-- Local: `API_URL=http://localhost:9999/api`
-- Remote: `API_URL=http://docker-host-01.bub.lan:9999/api`
+- Local: `API_URL=http://localhost:9998/api`
+- Remote: `API_URL=http://docker-host-01.bub.lan:9998/api`
 
 **Production control script:**
 ```bash
@@ -91,8 +91,8 @@ docker-compose -f docker-compose.prod.yml up -d
 ```
 
 Access the production app:
-- Frontend: http://localhost:9998
-- Backend API: http://localhost:9999
+- Frontend: http://localhost:9999
+- Backend API: http://localhost:9998
 
 The production configuration uses:
 - Pre-built multi-platform images (amd64/arm64)

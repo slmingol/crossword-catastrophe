@@ -11,8 +11,8 @@ case "$CMD" in
     docker compose -f docker-compose.prod.yml up -d
     echo ""
     echo "✅ Services started!"
-    echo "   Frontend: http://localhost:9998"
-    echo "   Backend:  http://localhost:9999"
+    echo "   Frontend: http://localhost:9999"
+    echo "   Backend:  http://localhost:9998"
     echo ""
     echo "View logs: ./scripts/run-prod.sh logs"
     ;;
