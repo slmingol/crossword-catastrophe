@@ -64,12 +64,21 @@ For production deployments using pre-built images from GitHub Container Registry
 # Create data directory for SQLite database
 mkdir -p data
 
-# Use the production compose file
-docker-compose -f docker-compose.prod.yml up -d
+# Start production services
+./scripts/run-prod.sh
 
-# Or pull and run specific versions
-docker-compose -f docker-compose.prod.yml pull
+# Or use docker compose directly
 docker-compose -f docker-compose.prod.yml up -d
+```
+
+**Production control script:**
+```bash
+./scripts/run-prod.sh start   # Start all services
+./scripts/run-prod.sh stop    # Stop all services
+./scripts/run-prod.sh restart # Restart services
+./scripts/run-prod.sh logs    # View logs
+./scripts/run-prod.sh status  # Show running services
+./scripts/run-prod.sh update  # Pull latest images and restart
 ```
 
 Access the production app:
