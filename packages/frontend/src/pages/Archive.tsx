@@ -87,53 +87,43 @@ export default function Archive() {
         padding: '0.75rem 1rem', 
         backgroundColor: '#f8f9fa',
         borderRadius: '4px',
-        fontSize: '0.85rem'
+        fontSize: '0.85rem',
+        display: 'flex',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '0.5rem'
       }}>
-        <span style={{ fontWeight: '600', marginRight: '1rem', color: '#666' }}>Filter by source:</span>
+        <span style={{ fontWeight: '600', color: '#666', marginRight: '0.5rem' }}>Filter:</span>
         {Object.entries(SOURCE_CONFIG).map(([name, config]) => {
           const isSelected = selectedSources.has(name);
           return (
             <button
               key={name}
               onClick={() => toggleSource(name)}
+              title={name}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                marginRight: '1rem',
-                marginBottom: '0.5rem',
-                padding: '0.4rem 0.6rem',
+                padding: '0.3rem 0.5rem',
                 border: `2px solid ${isSelected ? config.color : '#ddd'}`,
                 borderRadius: '4px',
                 backgroundColor: isSelected ? config.bg : 'white',
                 cursor: 'pointer',
                 transition: 'all 0.15s',
-                opacity: isSelected ? 1 : 0.6
+                opacity: isSelected ? 1 : 0.5,
+                fontSize: '0.7rem',
+                fontWeight: '700',
+                letterSpacing: '0.3px',
+                color: config.color
               }}
             >
-              <span
-                style={{
-                  display: 'inline-block',
-                  fontSize: '0.65rem',
-                  fontWeight: '700',
-                  padding: '0.2rem 0.4rem',
-                  borderRadius: '3px',
-                  backgroundColor: config.bg,
-                  color: config.color,
-                  marginRight: '0.5rem',
-                  minWidth: '36px',
-                  textAlign: 'center',
-                  letterSpacing: '0.3px'
-                }}
-              >
-                {config.abbr}
-              </span>
-              <span style={{ color: '#333', fontSize: '0.85rem', fontWeight: '500' }}>{name}</span>
+              {config.abbr}
             </button>
           );
         })}
-        <div style={{ marginTop: '0.5rem', color: '#666', fontSize: '0.8rem' }}>
-          Showing {filteredPuzzles.length} of {data?.puzzles.length || 0} puzzles
-        </div>
+        <span style={{ marginLeft: 'auto', color: '#666', fontSize: '0.8rem' }}>
+          {filteredPuzzles.length} of {data?.puzzles.length || 0}
+        </span>
       </div>
       
       {data && filteredPuzzles.length > 0 ? (
