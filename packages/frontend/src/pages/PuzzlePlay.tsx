@@ -76,9 +76,26 @@ function SimpleCrossword({ puzzle }: { puzzle: Puzzle }) {
         }, 0);
       }
     } else if (e.key === 'Backspace') {
+      e.preventDefault();
       const newGrid = userGrid.map(row => [...row]);
-      newGrid[rowIdx][colIdx] = '';
-      setUserGrid(newGrid);
+      
+      // If current cell has a letter, delete it
+      if (newGrid[rowIdx][colIdx]) {
+        newGrid[rowIdx][colIdx] = '';
+        setUserGrid(newGrid);
+      } else {
+        // If current cell is empty, move to previous cell and delete it
+        let prevCol = colIdx - 1;
+        while (prevCol >= 0 && solution[rowIdx][prevCol] === '.') prevCol--;
+        if (prevCol >= 0) {
+          newGrid[rowIdx][prevCol] = '';
+          setUserGrid(newGrid);
+          setTimeout(() => {
+            const prevKey = `${rowIdx}-${prevCol}`;
+            cellRefs.current[prevKey]?.focus();
+          }, 0);
+        }
+      }
     } else if (e.key === 'ArrowRight') {
       e.preventDefault();
       let nextCol = colIdx + 1;
