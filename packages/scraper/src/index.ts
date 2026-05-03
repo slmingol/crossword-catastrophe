@@ -1,12 +1,23 @@
 import cron from 'node-cron';
 import { scrapePuzzles } from './scrape.js';
 import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const SCRAPE_SCHEDULE = process.env.SCRAPE_SCHEDULE || '0 6 * * *'; // 6 AM daily
 
-console.log('Crossword scraper service started');
+// Read version from package.json
+const packageJson = JSON.parse(
+  fs.readFileSync(path.join(__dirname, '../package.json'), 'utf-8')
+);
+
+console.log(`🔍 Scraper v${packageJson.version} started`);
 console.log(`Schedule: ${SCRAPE_SCHEDULE}`);
 
 // Run immediately on startup

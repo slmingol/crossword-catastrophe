@@ -99,8 +99,13 @@ function start() {
     
     console.log('Database ready');
 
+    // Read version from package.json
+    const packageJson = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '../package.json'), 'utf-8')
+    );
+
     app.listen(PORT, () => {
-      console.log(`Backend server running on http://localhost:${PORT}`);
+      console.log(`🚀 Backend v${packageJson.version} running on http://localhost:${PORT}`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);
