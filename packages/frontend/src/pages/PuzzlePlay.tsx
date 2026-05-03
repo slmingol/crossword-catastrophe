@@ -107,6 +107,33 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }:
     }
   };
 
+  const handleInput = (e: React.FormEvent<HTMLDivElement>, rowIdx: number, colIdx: number) => {
+    if (solution[rowIdx][colIdx] === '.') return;
+    
+    const target = e.currentTarget;
+    const text = target.textContent || '';
+    const letter = text.replace(/[^a-zA-Z]/g, '').toUpperCase().slice(-1);
+    
+    if (letter) {
+      const newGrid = userGrid.map(row => [...row]);
+      newGrid[rowIdx][colIdx] = letter;
+      setUserGrid(newGrid);
+      
+      // Clear contentEditable to show only one letter
+      target.textContent = letter;
+      
+      // Move to next cell
+      let nextCol = colIdx + 1;
+      while (nextCol < width && solution[rowIdx][nextCol] === '.') nextCol++;
+      if (nextCol < width) {
+        setTimeout(() => {
+          const nextKey = `${rowIdx}-${nextCol}`;
+          cellRefs.current[nextKey]?.focus();
+        }, 0);
+      }
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent, rowIdx: number, colIdx: number) => {
     if (solution[rowIdx][colIdx] === '.') return;
 
@@ -182,9 +209,9 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }:
   // Account for: main padding (8px), grid border (2px), minimal margin (6px)
   const paddingOverhead = isMobile ? 16 : 0;
   const availableWidth = windowWidth - paddingOverhead;
-  const maxCellSize = isMobile ? 40 : 34; // Allow larger cells on mobile to fill width
+  const maxCellSize = isMobile ? 50 : 48; // Larger cells for better visibility
   const calculatedSize = Math.floor(availableWidth / width);
-  const cellSize = Math.min(Math.max(calculatedSize, 10), maxCellSize); // Min 10px, max 40/34px
+  const cellSize = Math.min(Math.max(calculatedSize, 10), maxCellSize); // Min 10px, max 50/48px
 
   return (
     <div>
@@ -215,7 +242,10 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }:
                 key={`${rowIdx}-${colIdx}`}
                 ref={(el) => cellRefs.current[`${rowIdx}-${colIdx}`] = el}
                 tabIndex={cell !== '.' ? 0 : -1}
+                contentEditable={cell !== '.' && isMobile}
+                suppressContentEditableWarning={true}
                 onClick={() => handleCellClick(rowIdx, colIdx)}
+                onInput={(e) => isMobile && handleInput(e, rowIdx, colIdx)}
                 onKeyDown={(e) => handleKeyDown(e, rowIdx, colIdx)}
                 onFocus={() => cell !== '.' && setFocusedCell({ row: rowIdx, col: colIdx })}
                 style={{
