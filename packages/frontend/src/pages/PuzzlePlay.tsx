@@ -107,52 +107,10 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }:
     }
   };
 
-  const handleInput = (e: React.FormEvent<HTMLDivElement>, rowIdx: number, colIdx: number) => {
-    if (solution[rowIdx][colIdx] === '.') return;
-    
-    const target = e.currentTarget;
-    const text = target.textContent || '';
-    const letter = text.replace(/[^a-zA-Z]/g, '').toUpperCase().slice(-1);
-    
-    if (letter) {
-      const newGrid = userGrid.map(row => [...row]);
-      newGrid[rowIdx][colIdx] = letter;
-      setUserGrid(newGrid);
-      
-      // Clear contentEditable to show only one letter
-      target.textContent = letter;
-      
-      // Move to next cell
-      let nextCol = colIdx + 1;
-      while (nextCol < width && solution[rowIdx][nextCol] === '.') nextCol++;
-      if (nextCol < width) {
-        setTimeout(() => {
-          const nextKey = `${rowIdx}-${nextCol}`;
-          cellRefs.current[nextKey]?.focus();
-        }, 0);
-      }
-    }
-  };
-
   const handleKeyDown = (e: React.KeyboardEvent, rowIdx: number, colIdx: number) => {
     if (solution[rowIdx][colIdx] === '.') return;
 
-    if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
-      e.preventDefault();
-      const newGrid = userGrid.map(row => [...row]);
-      newGrid[rowIdx][colIdx] = e.key.toUpperCase();
-      setUserGrid(newGrid);
-      
-      // Move to next cell
-      let nextCol = colIdx + 1;
-      while (nextCol < width && solution[rowIdx][nextCol] === '.') nextCol++;
-      if (nextCol < width) {
-        setTimeout(() => {
-          const nextKey = `${rowIdx}-${nextCol}`;
-          cellRefs.current[nextKey]?.focus();
-        }, 0);
-      }
-    } else if (e.key === 'Backspace') {
+    if (e.key === 'Backspace' || e.key === 'Delete') {
       e.preventDefault();
       const newGrid = userGrid.map(row => [...row]);
       
@@ -246,14 +204,6 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }:
             return (
               <div
                 key={`${rowIdx}-${colIdx}`}
-                ref={(el) => cellRefs.current[`${rowIdx}-${colIdx}`] = el}
-                tabIndex={cell !== '.' ? 0 : -1}
-                contentEditable={cell !== '.' && isMobile}
-                suppressContentEditableWarning={true}
-                onClick={() => handleCellClick(rowIdx, colIdx)}
-                onInput={(e) => isMobile && handleInput(e, rowIdx, colIdx)}
-                onKeyDown={(e) => handleKeyDown(e, rowIdx, colIdx)}
-                onFocus={() => cell !== '.' && setFocusedCell({ row: rowIdx, col: colIdx })}
                 style={{
                   width: `${cellSize}px`,
                   height: `${cellSize}px`,
@@ -264,15 +214,8 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }:
                                    isCorrect ? colors.cellCorrect :
                                    isWrong ? colors.cellWrong :
                                    colors.cellBg,
-                  color: colors.cellText,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: `${Math.max(12, cellSize * 0.5)}px`,
-                  fontWeight: 'bold',
-                  cursor: cell !== '.' ? 'pointer' : 'default',
-                  outline: isFocused ? '2px solid #0066cc' : 'none',
-                  position: 'relative'
+                  position: 'relative',
+                  overflow: 'hidden'
                 }}
               >
                 {clueNum && (
@@ -282,12 +225,62 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }:
                     left: '2px',
                     fontSize: `${Math.max(7, cellSize * 0.24)}px`,
                     fontWeight: 'normal',
-                    color: colors.clueNumColor
+                    color: colors.clueNumColor,
+                    pointerEvents: 'none',
+                    zIndex: 1
                   }}>
                     {clueNum}
                   </span>
                 )}
-                {cell !== '.' ? displayValue : ''}
+                {cell !== '.' && (
+                  <input
+                    ref={(el) => cellRefs.current[`${rowIdx}-${colIdx}`] = el}
+                    type="text"
+                    maxLength={1}
+                    value={displayValue}
+                    disabled={showSolution}
+                    inputMode="text"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="characters"
+                    spellCheck={false}
+                    onClick={() => handleCellClick(rowIdx, colIdx)}
+                    onChange={(e) => {
+                      const value = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
+                      if (value) {
+                        const newGrid = userGrid.map(row => [...row]);
+                        newGrid[rowIdx][colIdx] = value;
+                        setUserGrid(newGrid);
+                        // Move to next cell
+                        let nextCol = colIdx + 1;
+                        while (nextCol < width && solution[rowIdx][nextCol] === '.') nextCol++;
+                        if (nextCol < width) {
+                          setTimeout(() => {
+                            const nextKey = `${rowIdx}-${nextCol}`;
+                            cellRefs.current[nextKey]?.focus();
+                          }, 0);
+                        }
+                      }
+                    }}
+                    onKeyDown={(e) => handleKeyDown(e, rowIdx, colIdx)}
+                    onFocus={() => setFocusedCell({ row: rowIdx, col: colIdx })}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      border: 'none',
+                      background: 'transparent',
+                      color: colors.cellText,
+                      textAlign: 'center',
+                      fontSize: `${Math.max(12, cellSize * 0.5)}px`,
+                      fontWeight: 'bold',
+                      outline: isFocused ? '2px solid #0066cc' : 'none',
+                      cursor: 'pointer',
+                      padding: 0,
+                      margin: 0,
+                      caretColor: 'transparent'
+                    }}
+                  />
+                )}
               </div>
             );
           })
