@@ -612,9 +612,9 @@ export default function PuzzlePlay() {
 
   const handleShowSolution = useCallback(() => {
     if (!showSolution && puzzle?.grid_data?.solution) {
-      // When showing solution, copy it to userGrid so Check will work correctly
+      // When showing solution, clear the user grid
       const solution = puzzle.grid_data.solution;
-      setUserGrid(solution.map((row: string[]) => [...row]));
+      setUserGrid(solution.map((row: string[]) => row.map((cell: string) => cell === '.' ? '.' : '')));
     }
     setShowSolution(prev => !prev);
   }, [showSolution, puzzle]);
