@@ -272,14 +272,15 @@ export default function Layout({ children }: LayoutProps) {
         }}>
           <p style={{ margin: 0 }}>Self-hosted Crossword Archive</p>
           {version && (
-            <p style={{ 
-              margin: 0, 
+            <div style={{ 
+              textAlign: 'right',
               fontSize: '0.85rem',
               opacity: 0.8,
-              textAlign: 'right'
-            }} title={`Backend: ${version.components.backend}, Frontend: ${version.components.frontend}, Scraper: ${version.components.scraper}`}>
-              v{version.version}
-            </p>
+              lineHeight: '1.4'
+            }}>
+              <div>© {new Date().getFullYear()} Crossword Cat-a-strophe</div>
+              <div>v{version.version}</div>
+            </div>
           )}
         </footer>
       </div>
