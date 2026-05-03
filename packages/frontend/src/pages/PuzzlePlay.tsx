@@ -167,11 +167,11 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }:
   
   let availableWidth;
   if (isMobile) {
-    // Mobile: Use 98% of width to maximize space
-    availableWidth = windowWidth * 0.98;
+    // Mobile: Use full width
+    availableWidth = windowWidth * 0.95;
   } else {
-    // Desktop: Use 80% of window width for prominence
-    availableWidth = windowWidth * 0.8;
+    // Desktop: Grid should be ~60% of window width
+    availableWidth = windowWidth * 0.6;
   }
   
   const calculatedSize = Math.floor(availableWidth / width);
@@ -179,7 +179,7 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }:
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: isMobile ? '0.5rem' : '2rem', alignItems: 'flex-start', flexWrap: 'wrap', padding: '0' }}>
+      <div style={{ display: 'flex', gap: isMobile ? '0.5rem' : '2rem', alignItems: 'flex-start', flexWrap: isMobile ? 'wrap' : 'nowrap', padding: '0' }}>
         <div style={{ 
           display: 'grid',
           gridTemplateColumns: `repeat(${width}, ${cellSize}px)`,
@@ -287,7 +287,7 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }:
         )}
       </div>
       
-      <div style={{ flex: 1, minWidth: isMobile ? '100%' : '300px' }}>
+      <div style={{ flex: isMobile ? 1 : '0 1 350px', minWidth: isMobile ? '100%' : '300px', maxWidth: isMobile ? '100%' : '400px' }}>
         <div style={{ marginBottom: '1.5rem', border: `2px solid ${colors.acrossBorder}`, borderRadius: '6px', overflow: 'hidden' }}>
           <h3 style={{ 
             margin: 0, 
