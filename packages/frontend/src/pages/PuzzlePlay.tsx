@@ -396,7 +396,7 @@ export default function PuzzlePlay() {
             setUserGrid(progress.progress_data);
             setTimeSpent(progress.time_spent || 0);
           } else {
-            setUserGrid(solution.map(row => row.map(() => '')));
+            setUserGrid(solution.map((row: string[]) => row.map(() => '')));
           }
         })
         .catch(err => {
@@ -418,8 +418,8 @@ export default function PuzzlePlay() {
       // Check if complete using current ref value
       const solution = puzzle.grid_data?.solution || [];
       let allCorrect = true;
-      solution.forEach((row, r) => {
-        row.forEach((cell, c) => {
+      solution.forEach((row: string[], r: number) => {
+        row.forEach((cell: string, c: number) => {
           if (cell !== '.' && userGridRef.current[r]?.[c] !== cell) {
             allCorrect = false;
           }
@@ -438,8 +438,8 @@ export default function PuzzlePlay() {
     const solution = puzzle.grid_data?.solution || [];
     let correct = 0, total = 0;
     const currentGrid = userGridRef.current;
-    solution.forEach((row, r) => {
-      row.forEach((cell, c) => {
+    solution.forEach((row: string[], r: number) => {
+      row.forEach((cell: string, c: number) => {
         if (cell !== '.') {
           total++;
           if (currentGrid[r]?.[c] === cell) correct++;
@@ -490,7 +490,7 @@ export default function PuzzlePlay() {
     if (!showSolution && puzzle?.grid_data?.solution) {
       // When showing solution, copy it to userGrid so Check will work correctly
       const solution = puzzle.grid_data.solution;
-      setUserGrid(solution.map(row => [...row]));
+      setUserGrid(solution.map((row: string[]) => [...row]));
     }
     setShowSolution(!showSolution);
   }, [showSolution, puzzle]);

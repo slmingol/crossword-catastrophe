@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api, Puzzle, PuzzleListResponse, UserProgress } from '../api/client';
-import { format } from 'date-fns';
 import { useTheme } from '../components/Layout';
 
 // Source badge colors and abbreviations
