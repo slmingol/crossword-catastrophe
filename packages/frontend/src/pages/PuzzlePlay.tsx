@@ -248,11 +248,12 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }:
                     onClick={() => handleCellClick(rowIdx, colIdx)}
                     onChange={(e) => {
                       const value = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
+                      const newGrid = userGrid.map(row => [...row]);
+                      newGrid[rowIdx][colIdx] = value;
+                      setUserGrid(newGrid);
+                      
+                      // If value entered, move to next cell
                       if (value) {
-                        const newGrid = userGrid.map(row => [...row]);
-                        newGrid[rowIdx][colIdx] = value;
-                        setUserGrid(newGrid);
-                        // Move to next cell
                         let nextCol = colIdx + 1;
                         while (nextCol < width && solution[rowIdx][nextCol] === '.') nextCol++;
                         if (nextCol < width) {
