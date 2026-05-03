@@ -23,21 +23,35 @@ Self-hosted crossword puzzle application with daily puzzle scraping from multipl
 ## ✨ Features
 
 - 🎯 **Interactive puzzle grid** with keyboard navigation and answer validation
-- 📚 **990+ puzzles** dating back to August 2025
-- 🔄 **Daily automatic scraping** from 4 major sources
+- 📚 **4100+ puzzles** dating back to February 2026
+- 🔄 **Daily automatic scraping** from 5 major sources including Seattle Times Midi
 - 🎨 **Animated splash screen** with logo transition
-- 🔍 **Source filtering** with visual badges (LA Times, Newsday, USA Today, Universal)
+- 🔍 **Source filtering** with visual badges (LA Times, Newsday, Seattle Times, USA Today, Universal)
 - 💾 **Auto-save progress** every 30 seconds
 - ⏱️ **Built-in timer** and completion tracking
-- 📱 **Mobile-responsive** design
+- 📱 **Mobile-optimized** with native keyboard, touch controls, and tabbed clues interface
+- 👆 **Touch-friendly buttons** with responsive feedback
+- 🔄 **Smart Show/Hide** - reveals solution temporarily without overwriting your progress
 - 🏠 **Self-hosted** - your data stays with you
 
 ## 🏗️ Architecture
 
-- **Frontend**: React 18 + TypeScript + Vite
+- **Frontend**: React 18 + TypeScript + Vite build served by nginx
 - **Backend**: Express + TypeScript
-- **Scraper**: Node.js + Python (xword-dl)
+- **Scraper**: Node.js + Python (xword-dl fork with Seattle Times support)
 - **Database**: SQLite 3 with WAL mode
+
+## 📱 Mobile Experience
+
+The app is fully optimized for mobile devices:
+
+- **Native keyboard support** - HTML input elements trigger mobile keyboards automatically
+- **Responsive grid sizing** - 95% width on mobile, 60% on desktop for optimal viewing
+- **Tabbed clues interface** - Switch between ACROSS and DOWN clues with dedicated tabs
+- **Touch-optimized buttons** - All interactive elements use touch event handlers
+- **Backspace support** - Delete letters naturally using your mobile keyboard
+- **Auto-focus management** - Smooth navigation between cells
+- **Show/Hide solution** - Temporarily view answers without losing your progress
 
 ## 🚀 Quick Start
 
@@ -148,10 +162,11 @@ Daily puzzles are automatically scraped from:
 
 - **Los Angeles Times** - Daily crosswords
 - **Newsday** - Saturday Stumper and daily puzzles
+- **Seattle Times Midi** - Historical puzzles dating back to Feb 4, 2026 with ID-based retrieval
 - **USA Today** - Daily crosswords
 - **Universal Crossword** - Daily syndicated puzzles
 
-All puzzles are downloaded via [xword-dl](https://github.com/thisisparker/xword-dl), which handles authentication and format conversion.
+All puzzles are downloaded via a custom fork of [xword-dl](https://github.com/slmingol/xword-dl) with Seattle Times Midi support, which handles authentication and format conversion.
 
 ## 📂 Data Storage
 
@@ -159,7 +174,7 @@ All puzzle data is stored in a single SQLite database file (`data/crossword.db`)
 
 ### Database Version Control
 
-The repository includes a baseline database with 990+ puzzles. Each instance can acquire new puzzles via the daily scraper, and you can merge updates back to the repository:
+The repository includes a baseline database with 4100+ puzzles. Each instance can acquire new puzzles via the daily scraper, and you can merge updates back to the repository:
 
 ```bash
 # After your instance has collected new puzzles, merge them:
@@ -188,14 +203,15 @@ git push
 
 ## 🎮 How to Use
 
-1. Open http://localhost:3000
+1. Open http://localhost:3000 (or your production URL)
 2. Browse the puzzle archive or click a date badge
 3. Filter by source using the colored badges at the top
 4. Click any puzzle to start playing
-5. Use keyboard or mouse to fill in answers
+5. Use keyboard or tap cells to fill in answers (mobile keyboards appear automatically)
 6. Click **Check** to validate your answers
-7. Click **Show** to reveal the solution
+7. Click **Show** to temporarily reveal the solution (clears your grid, click **Hide** to continue)
 8. Progress auto-saves every 30 seconds
+9. On mobile, use the ACROSS/DOWN tabs to switch between clue lists
 
 ## 🔧 Troubleshooting
 
