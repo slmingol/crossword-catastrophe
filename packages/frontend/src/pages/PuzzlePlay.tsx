@@ -615,7 +615,7 @@ export default function PuzzlePlay() {
       const solution = puzzle.grid_data.solution;
       setUserGrid(solution.map((row: string[]) => [...row]));
     }
-    setShowSolution(!showSolution);
+    setShowSolution(prev => !prev);
   }, [showSolution, puzzle]);
 
   // Set actions in nav bar
@@ -623,7 +623,7 @@ export default function PuzzlePlay() {
     if (puzzle) {
       setActions(
         <>
-          <button onClick={checkAnswers} style={{
+          <button onClick={checkAnswers} onTouchEnd={(e) => { e.preventDefault(); checkAnswers(); }} style={{
             padding: '0.3rem 0.6rem',
             backgroundColor: '#0066cc',
             color: 'white',
@@ -634,7 +634,7 @@ export default function PuzzlePlay() {
           }}>
             Check
           </button>
-          <button onClick={handleShowSolution} style={{
+          <button onClick={handleShowSolution} onTouchEnd={(e) => { e.preventDefault(); handleShowSolution(); }} style={{
             padding: '0.3rem 0.6rem',
             backgroundColor: '#555',
             color: 'white',
