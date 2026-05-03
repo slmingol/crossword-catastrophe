@@ -267,7 +267,7 @@ puzzleRouter.get('/:id/previous', (req, res) => {
     }
     
     if (!previous) {
-      return res.status(404).json({ error: 'No previous puzzle' });
+      return res.json(null);
     }
     
     res.json(previous);
@@ -310,7 +310,7 @@ puzzleRouter.get('/:id/next', (req, res) => {
     }
     
     if (!next) {
-      return res.status(404).json({ error: 'No next puzzle' });
+      return res.json(null);
     }
     
     res.json(next);
