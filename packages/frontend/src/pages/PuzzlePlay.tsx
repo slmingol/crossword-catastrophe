@@ -179,12 +179,12 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }:
 
   // Calculate responsive cell size
   const isMobile = windowWidth < 768;
-  // Account for: main padding (16px), grid padding (4px), grid border (2px), cell borders (~15px), margin (~10px)
-  const paddingOverhead = isMobile ? 50 : 0;
+  // Account for: main padding (8px), grid border (2px), minimal margin (6px)
+  const paddingOverhead = isMobile ? 16 : 0;
   const availableWidth = windowWidth - paddingOverhead;
-  const maxCellSize = isMobile ? 26 : 34; // Smaller max size on mobile
+  const maxCellSize = isMobile ? 40 : 34; // Allow larger cells on mobile to fill width
   const calculatedSize = Math.floor(availableWidth / width);
-  const cellSize = Math.min(Math.max(calculatedSize, 10), maxCellSize); // Min 10px, max 26/34px
+  const cellSize = Math.min(Math.max(calculatedSize, 10), maxCellSize); // Min 10px, max 40/34px
 
   return (
     <div>

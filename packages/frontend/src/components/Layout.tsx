@@ -256,7 +256,7 @@ export default function Layout({ children }: LayoutProps) {
             )}
           </div>
         </header>
-        <main style={{ flex: 1, padding: window.innerWidth < 768 ? '0.5rem' : '2rem', maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
+        <main style={{ flex: 1, padding: window.innerWidth < 768 ? '0.25rem' : '2rem', maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
           {children}
         </main>
         <footer style={{
