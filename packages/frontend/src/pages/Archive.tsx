@@ -52,7 +52,12 @@ export default function Archive() {
     const saved = localStorage.getItem('selectedSources');
     if (saved) {
       try {
-        return new Set(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        // If empty array was saved, default to all sources
+        if (Array.isArray(parsed) && parsed.length === 0) {
+          return new Set(Object.keys(SOURCE_CONFIG));
+        }
+        return new Set(parsed);
       } catch {
         return new Set(Object.keys(SOURCE_CONFIG));
       }
