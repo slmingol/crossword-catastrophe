@@ -257,7 +257,7 @@ export default function Archive() {
                   }}
                 >
                   <span style={{ fontWeight: '600', marginRight: '1rem', minWidth: '80px' }}>
-                    {format(new Date(puzzle.date), 'M/d/yy')}
+                    {puzzle.date.replace(/(\d{4})-(\d{2})-(\d{2})/, '$2/$3/$1').replace(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/, (_, m, d, y) => `${parseInt(m)}/${parseInt(d)}/${y.slice(2)}`)}
                   </span>
                   <SourceBadge source={puzzle.source} theme={theme} />
                   {isCompleted && <span style={{ marginRight: '0.5rem', color: '#28a745', fontSize: '1rem' }}>✓</span>}
