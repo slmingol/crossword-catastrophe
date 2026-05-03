@@ -105,7 +105,12 @@ function start() {
     );
 
     app.listen(PORT, () => {
-      console.log(`🚀 Backend v${packageJson.version} running on http://localhost:${PORT}`);
+      console.log('\n' + '='.repeat(60));
+      console.log('  🚀 BACKEND SERVICE');
+      console.log('  Version: ' + packageJson.version);
+      console.log('  Port: ' + PORT);
+      console.log('  URL: http://localhost:' + PORT);
+      console.log('='.repeat(60) + '\n');
     });
   } catch (error) {
     console.error('Failed to start server:', error);

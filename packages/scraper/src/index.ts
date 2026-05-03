@@ -17,8 +17,11 @@ const packageJson = JSON.parse(
   fs.readFileSync(path.join(__dirname, '../package.json'), 'utf-8')
 );
 
-console.log(`🔍 Scraper v${packageJson.version} started`);
-console.log(`Schedule: ${SCRAPE_SCHEDULE}`);
+console.log('\n' + '='.repeat(60));
+console.log('  🔍 SCRAPER SERVICE');
+console.log('  Version: ' + packageJson.version);
+console.log('  Schedule: ' + SCRAPE_SCHEDULE);
+console.log('='.repeat(60) + '\n');
 
 // Run immediately on startup
 console.log('Running initial scrape...');
