@@ -18,6 +18,7 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }:
   const [focusedCell, setFocusedCell] = useState<{row: number, col: number} | null>(null);
   const cellRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
+  const [activeTab, setActiveTab] = useState<'across' | 'down'>('across');
 
   // Handle window resize for responsive grid
   useEffect(() => {
@@ -288,88 +289,181 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }:
       </div>
       
       <div style={{ flex: isMobile ? 1 : '0 1 350px', minWidth: isMobile ? '100%' : '300px', maxWidth: isMobile ? '100%' : '400px' }}>
-        <div style={{ marginBottom: '1.5rem', border: `2px solid ${colors.acrossBorder}`, borderRadius: '6px', overflow: 'hidden' }}>
-          <h3 style={{ 
-            margin: 0, 
-            padding: '0.75rem 1rem', 
-            fontSize: '1.1rem', 
-            fontWeight: '700',
-            backgroundColor: colors.acrossBg, 
-            color: 'white',
-            letterSpacing: '0.5px'
-          }}>ACROSS</h3>
-          <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '0.5rem' }}>
-            {Object.entries(puzzle.clues_across || {}).map(([num, clue]: [string, any]) => (
-              <div 
-                key={num} 
-                style={{ 
-                  marginBottom: '0.5rem', 
-                  padding: '0.6rem 0.75rem', 
-                  backgroundColor: colors.acrossClue,
-                  color: colors.acrossClueText,
-                  border: `1px solid ${colors.acrossClueHover}`,
-                  borderLeft: `3px solid ${colors.acrossBorder}`,
-                  borderRadius: '4px', 
-                  fontSize: '0.9rem',
-                  transition: 'all 0.15s',
-                  cursor: 'pointer'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = colors.acrossClueHover;
-                  e.currentTarget.style.transform = 'translateX(4px)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = colors.acrossClue;
-                  e.currentTarget.style.transform = 'translateX(0)';
+        {isMobile ? (
+          // Mobile: Tabbed interface
+          <div style={{ border: `2px solid ${activeTab === 'across' ? colors.acrossBorder : colors.downBorder}`, borderRadius: '6px', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', borderBottom: `2px solid ${activeTab === 'across' ? colors.acrossBorder : colors.downBorder}` }}>
+              <button
+                onClick={() => setActiveTab('across')}
+                style={{
+                  flex: 1,
+                  margin: 0,
+                  padding: '0.75rem 1rem',
+                  fontSize: '1.1rem',
+                  fontWeight: '700',
+                  backgroundColor: activeTab === 'across' ? colors.acrossBg : 'transparent',
+                  color: activeTab === 'across' ? 'white' : colors.acrossClueText,
+                  border: 'none',
+                  borderRight: `1px solid ${activeTab === 'across' ? colors.acrossBorder : colors.downBorder}`,
+                  letterSpacing: '0.5px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
                 }}
               >
-                <strong style={{ color: colors.acrossClueNum, marginRight: '0.5rem' }}>{num}.</strong> 
-                <span>{typeof clue === 'string' ? clue : clue.clue}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div style={{ border: `2px solid ${colors.downBorder}`, borderRadius: '6px', overflow: 'hidden' }}>
-          <h3 style={{ 
-            margin: 0, 
-            padding: '0.75rem 1rem', 
-            fontSize: '1.1rem', 
-            fontWeight: '700',
-            backgroundColor: colors.downBg, 
-            color: 'white',
-            letterSpacing: '0.5px'
-          }}>DOWN</h3>
-          <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '0.5rem' }}>
-            {Object.entries(puzzle.clues_down || {}).map(([num, clue]: [string, any]) => (
-              <div 
-                key={num} 
-                style={{ 
-                  marginBottom: '0.5rem', 
-                  padding: '0.6rem 0.75rem', 
-                  backgroundColor: colors.downClue,
-                  color: colors.downClueText,
-                  border: `1px solid ${colors.downClueHover}`,
-                  borderLeft: `3px solid ${colors.downBorder}`,
-                  borderRadius: '4px', 
-                  fontSize: '0.9rem',
-                  transition: 'all 0.15s',
-                  cursor: 'pointer'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = colors.downClueHover;
-                  e.currentTarget.style.transform = 'translateX(4px)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = colors.downClue;
-                  e.currentTarget.style.transform = 'translateX(0)';
+                ACROSS
+              </button>
+              <button
+                onClick={() => setActiveTab('down')}
+                style={{
+                  flex: 1,
+                  margin: 0,
+                  padding: '0.75rem 1rem',
+                  fontSize: '1.1rem',
+                  fontWeight: '700',
+                  backgroundColor: activeTab === 'down' ? colors.downBg : 'transparent',
+                  color: activeTab === 'down' ? 'white' : colors.downClueText,
+                  border: 'none',
+                  letterSpacing: '0.5px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
                 }}
               >
-                <strong style={{ color: colors.downClueNum, marginRight: '0.5rem' }}>{num}.</strong> 
-                <span>{typeof clue === 'string' ? clue : clue.clue}</span>
-              </div>
-            ))}
+                DOWN
+              </button>
+            </div>
+            <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '0.5rem' }}>
+              {activeTab === 'across' ? (
+                Object.entries(puzzle.clues_across || {}).map(([num, clue]: [string, any]) => (
+                  <div 
+                    key={num} 
+                    style={{ 
+                      marginBottom: '0.5rem', 
+                      padding: '0.6rem 0.75rem', 
+                      backgroundColor: colors.acrossClue,
+                      color: colors.acrossClueText,
+                      border: `1px solid ${colors.acrossClueHover}`,
+                      borderLeft: `3px solid ${colors.acrossBorder}`,
+                      borderRadius: '4px', 
+                      fontSize: '0.9rem',
+                      transition: 'all 0.15s',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <strong style={{ color: colors.acrossClueNum, marginRight: '0.5rem' }}>{num}.</strong> 
+                    <span>{typeof clue === 'string' ? clue : clue.clue}</span>
+                  </div>
+                ))
+              ) : (
+                Object.entries(puzzle.clues_down || {}).map(([num, clue]: [string, any]) => (
+                  <div 
+                    key={num} 
+                    style={{ 
+                      marginBottom: '0.5rem', 
+                      padding: '0.6rem 0.75rem', 
+                      backgroundColor: colors.downClue,
+                      color: colors.downClueText,
+                      border: `1px solid ${colors.downClueHover}`,
+                      borderLeft: `3px solid ${colors.downBorder}`,
+                      borderRadius: '4px', 
+                      fontSize: '0.9rem',
+                      transition: 'all 0.15s',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <strong style={{ color: colors.downClueNum, marginRight: '0.5rem' }}>{num}.</strong> 
+                    <span>{typeof clue === 'string' ? clue : clue.clue}</span>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
-        </div>
+        ) : (
+          // Desktop: Separate sections
+          <>
+            <div style={{ marginBottom: '1.5rem', border: `2px solid ${colors.acrossBorder}`, borderRadius: '6px', overflow: 'hidden' }}>
+              <h3 style={{ 
+                margin: 0, 
+                padding: '0.75rem 1rem', 
+                fontSize: '1.1rem', 
+                fontWeight: '700',
+                backgroundColor: colors.acrossBg, 
+                color: 'white',
+                letterSpacing: '0.5px'
+              }}>ACROSS</h3>
+              <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '0.5rem' }}>
+                {Object.entries(puzzle.clues_across || {}).map(([num, clue]: [string, any]) => (
+                  <div 
+                    key={num} 
+                    style={{ 
+                      marginBottom: '0.5rem', 
+                      padding: '0.6rem 0.75rem', 
+                      backgroundColor: colors.acrossClue,
+                      color: colors.acrossClueText,
+                      border: `1px solid ${colors.acrossClueHover}`,
+                      borderLeft: `3px solid ${colors.acrossBorder}`,
+                      borderRadius: '4px', 
+                      fontSize: '0.9rem',
+                      transition: 'all 0.15s',
+                      cursor: 'pointer'
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.backgroundColor = colors.acrossClueHover;
+                      e.currentTarget.style.transform = 'translateX(4px)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.backgroundColor = colors.acrossClue;
+                      e.currentTarget.style.transform = 'translateX(0)';
+                    }}
+                  >
+                    <strong style={{ color: colors.acrossClueNum, marginRight: '0.5rem' }}>{num}.</strong> 
+                    <span>{typeof clue === 'string' ? clue : clue.clue}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div style={{ border: `2px solid ${colors.downBorder}`, borderRadius: '6px', overflow: 'hidden' }}>
+              <h3 style={{ 
+                margin: 0, 
+                padding: '0.75rem 1rem', 
+                fontSize: '1.1rem', 
+                fontWeight: '700',
+                backgroundColor: colors.downBg, 
+                color: 'white',
+                letterSpacing: '0.5px'
+              }}>DOWN</h3>
+              <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '0.5rem' }}>
+                {Object.entries(puzzle.clues_down || {}).map(([num, clue]: [string, any]) => (
+                  <div 
+                    key={num} 
+                    style={{ 
+                      marginBottom: '0.5rem', 
+                      padding: '0.6rem 0.75rem', 
+                      backgroundColor: colors.downClue,
+                      color: colors.downClueText,
+                      border: `1px solid ${colors.downClueHover}`,
+                      borderLeft: `3px solid ${colors.downBorder}`,
+                      borderRadius: '4px', 
+                      fontSize: '0.9rem',
+                      transition: 'all 0.15s',
+                      cursor: 'pointer'
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.backgroundColor = colors.downClueHover;
+                      e.currentTarget.style.transform = 'translateX(4px)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.backgroundColor = colors.downClue;
+                      e.currentTarget.style.transform = 'translateX(0)';
+                    }}
+                  >
+                    <strong style={{ color: colors.downClueNum, marginRight: '0.5rem' }}>{num}.</strong> 
+                    <span>{typeof clue === 'string' ? clue : clue.clue}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </div>
       
     </div>
