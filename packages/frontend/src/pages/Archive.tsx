@@ -121,12 +121,24 @@ export default function Archive() {
 
   const toggleSource = (source: string) => {
     setSelectedSources(prev => {
-      const next = new Set(prev);
-      if (next.has(source)) {
-        next.delete(source);
+      const allSources = Object.keys(SOURCE_CONFIG);
+      const allSelected = allSources.every(s => prev.has(s));
+      
+      let next: Set<string>;
+      
+      // If all are selected and clicking on one, show only that one
+      if (allSelected && prev.has(source)) {
+        next = new Set([source]);
       } else {
-        next.add(source);
+        // Normal toggle behavior
+        next = new Set(prev);
+        if (next.has(source)) {
+          next.delete(source);
+        } else {
+          next.add(source);
+        }
       }
+      
       localStorage.setItem('selectedSources', JSON.stringify(Array.from(next)));
       return next;
     });
