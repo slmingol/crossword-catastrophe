@@ -24,6 +24,4 @@ services:
     image: ghcr.io/slmingol/crossword-catastrophe-frontend:latest
     ports:
       - "9999:3000"
-    environment:
-      VITE_PROXY_TARGET: http://backend:3001
     restart: unless-stopped
