@@ -239,7 +239,7 @@ puzzleRouter.get('/:id/previous', (req, res) => {
   try {
     const { id } = req.params;
     
-    // Get current puzzle's date
+    // Get current puzzle's date and ID
     const current = db.prepare('SELECT date FROM puzzles WHERE id = ?').get(id) as { date: string } | undefined;
     
     if (!current) {
@@ -248,13 +248,23 @@ puzzleRouter.get('/:id/previous', (req, res) => {
     
     const currentDate = current.date;
     
-    // Get the most recent puzzle before this date
-    const previous = db.prepare(`
+    // First try to find a puzzle with the same date but lower ID
+    let previous = db.prepare(`
       SELECT id FROM puzzles
-      WHERE date < ?
-      ORDER BY date DESC, id DESC
+      WHERE date = ? AND id < ?
+      ORDER BY id DESC
       LIMIT 1
-    `).get(currentDate);
+    `).get(currentDate, id);
+    
+    // If no puzzle found with same date, get the most recent puzzle from previous date
+    if (!previous) {
+      previous = db.prepare(`
+        SELECT id FROM puzzles
+        WHERE date < ?
+        ORDER BY date DESC, id DESC
+        LIMIT 1
+      `).get(currentDate);
+    }
     
     if (!previous) {
       return res.status(404).json({ error: 'No previous puzzle' });
@@ -272,7 +282,7 @@ puzzleRouter.get('/:id/next', (req, res) => {
   try {
     const { id } = req.params;
     
-    // Get current puzzle's date
+    // Get current puzzle's date and ID
     const current = db.prepare('SELECT date FROM puzzles WHERE id = ?').get(id) as { date: string } | undefined;
     
     if (!current) {
@@ -281,13 +291,23 @@ puzzleRouter.get('/:id/next', (req, res) => {
     
     const currentDate = current.date;
     
-    // Get the earliest puzzle after this date
-    const next = db.prepare(`
+    // First try to find a puzzle with the same date but higher ID
+    let next = db.prepare(`
       SELECT id FROM puzzles
-      WHERE date > ?
-      ORDER BY date ASC, id ASC
+      WHERE date = ? AND id > ?
+      ORDER BY id ASC
       LIMIT 1
-    `).get(currentDate);
+    `).get(currentDate, id);
+    
+    // If no puzzle found with same date, get the earliest puzzle from next date
+    if (!next) {
+      next = db.prepare(`
+        SELECT id FROM puzzles
+        WHERE date > ?
+        ORDER BY date ASC, id ASC
+        LIMIT 1
+      `).get(currentDate);
+    }
     
     if (!next) {
       return res.status(404).json({ error: 'No next puzzle' });

@@ -48,9 +48,17 @@ export default function Archive() {
   const [progress, setProgress] = useState<Map<number, UserProgress>>(new Map());
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [selectedSources, setSelectedSources] = useState<Set<string>>(
-    new Set(Object.keys(SOURCE_CONFIG))
-  );
+  const [selectedSources, setSelectedSources] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem('selectedSources');
+    if (saved) {
+      try {
+        return new Set(JSON.parse(saved));
+      } catch {
+        return new Set(Object.keys(SOURCE_CONFIG));
+      }
+    }
+    return new Set(Object.keys(SOURCE_CONFIG));
+  });
 
   // Theme colors
   const colors = theme === 'dark' ? {
@@ -114,6 +122,7 @@ export default function Archive() {
       } else {
         next.add(source);
       }
+      localStorage.setItem('selectedSources', JSON.stringify(Array.from(next)));
       return next;
     });
     setPage(1); // Reset to first page when filter changes
@@ -143,6 +152,7 @@ export default function Archive() {
         <button
           onClick={() => {
             setSelectedSources(new Set());
+            localStorage.setItem('selectedSources', JSON.stringify([]));
             setPage(1);
           }}
           style={{
