@@ -486,6 +486,15 @@ export default function PuzzlePlay() {
     }
   }, [id, navigate]);
 
+  const handleShowSolution = useCallback(() => {
+    if (!showSolution && puzzle?.grid_data?.solution) {
+      // When showing solution, copy it to userGrid so Check will work correctly
+      const solution = puzzle.grid_data.solution;
+      setUserGrid(solution.map(row => [...row]));
+    }
+    setShowSolution(!showSolution);
+  }, [showSolution, puzzle]);
+
   // Set actions in nav bar
   useEffect(() => {
     if (puzzle) {
@@ -502,7 +511,7 @@ export default function PuzzlePlay() {
           }}>
             Check
           </button>
-          <button onClick={() => setShowSolution(!showSolution)} style={{
+          <button onClick={handleShowSolution} style={{
             padding: '0.3rem 0.6rem',
             backgroundColor: '#555',
             color: 'white',
@@ -517,7 +526,7 @@ export default function PuzzlePlay() {
       );
     }
     return () => setActions(null);
-  }, [puzzle, showSolution, setActions, checkAnswers]);
+  }, [puzzle, showSolution, setActions, checkAnswers, handleShowSolution]);
 
   // Set navigation in nav bar
   useEffect(() => {
