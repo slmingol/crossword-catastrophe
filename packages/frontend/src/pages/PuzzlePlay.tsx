@@ -209,12 +209,11 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }:
   
   let availableWidth;
   if (isMobile) {
-    // Mobile: Use nearly full width (just account for minimal padding)
-    const paddingOverhead = 8; // Very minimal padding
-    availableWidth = windowWidth - paddingOverhead;
+    // Mobile: Use 98% of width to maximize space
+    availableWidth = windowWidth * 0.98;
   } else {
-    // Desktop: Use 60% of window width
-    availableWidth = windowWidth * 0.6;
+    // Desktop: Use 80% of window width for prominence
+    availableWidth = windowWidth * 0.8;
   }
   
   const calculatedSize = Math.floor(availableWidth / width);
