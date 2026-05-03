@@ -53,14 +53,49 @@ The app is fully optimized for mobile devices:
 - **Auto-focus management** - Smooth navigation between cells
 - **Show/Hide solution** - Temporarily view answers without losing your progress
 
-## 🚀 Quick Start
+## 🚀 Quick Start (Pre-built Images)
+
+The easiest way to run Crossword Cat-a-strophe is using pre-built containers from GitHub Container Registry. No cloning required!
+
+```bash
+# Create project directory
+mkdir crossword-catastrophe && cd crossword-catastrophe
+
+# Download the production compose file
+curl -O https://raw.githubusercontent.com/slmingol/crossword-catastrophe/main/docker-compose.prod.yml
+
+# Create data directory
+mkdir -p data
+
+# Create environment file
+cat > .env << EOF
+API_URL=http://localhost:9998/api
+EOF
+
+# Start all services
+docker-compose -f docker-compose.prod.yml up -d
+
+# Access the app
+# Frontend: http://localhost:9999
+# Backend API: http://localhost:9998
+```
+
+**Important:** Set `API_URL` in `.env` to match your server's hostname:
+- Local: `API_URL=http://localhost:9998/api`
+- Remote: `API_URL=http://your-server.com:9998/api`
+
+The first time you run it, the scraper will download today's puzzles from all sources.
+
+### Building from Source
+
+If you want to build the containers yourself or contribute to development:
 
 ```bash
 # Clone the repository
 git clone https://github.com/slmingol/crossword-catastrophe.git
 cd crossword-catastrophe
 
-# Start all services with Docker Compose
+# Build and start all services
 docker-compose up -d
 
 # Access the app
@@ -68,33 +103,10 @@ docker-compose up -d
 # Backend API: http://localhost:3001
 ```
 
-The first time you run it, the scraper will download today's puzzles from all sources.
+### Management Commands
 
-### Production Deployment
+If you've cloned the repository, you can use the production control script for easier management:
 
-For production deployments using pre-built images from GitHub Container Registry:
-
-```bash
-# Create data directory for SQLite database
-mkdir -p data
-
-# Configure API URL for your hostname
-cp .env.production.example .env
-# Edit .env and set API_URL to your server's hostname:
-# API_URL=http://your-server.com:9999/api
-
-# Start production services
-./scripts/run-prod.sh
-
-# Or use docker compose directly
-docker-compose -f docker-compose.prod.yml up -d
-```
-
-**Important:** The frontend needs to know where the backend API is. Set the `API_URL` environment variable in `.env` to match your server's hostname. For example:
-- Local: `API_URL=http://localhost:9998/api`
-- Remote: `API_URL=http://docker-host-01.bub.lan:9998/api`
-
-**Production control script:**
 ```bash
 ./scripts/run-prod.sh start   # Start all services
 ./scripts/run-prod.sh stop    # Stop all services
@@ -104,31 +116,21 @@ docker-compose -f docker-compose.prod.yml up -d
 ./scripts/run-prod.sh update  # Pull latest images and restart
 ```
 
-Access the production app:
-- Frontend: http://localhost:9999
-- Backend API: http://localhost:9998
-
-The production configuration uses:
-- Pre-built multi-platform images (amd64/arm64)
-- Production environment settings
-- Auto-restart policies
-- No source code volume mounts
-- Local `./data` directory for SQLite database (easy to backup)
-
-## 🐳 Using Pre-built Container Images
-
-Pre-built multi-platform (amd64/arm64) containers are available from GitHub Container Registry:
+Without the script, use standard Docker Compose commands:
 
 ```bash
-# Pull the latest images
-docker pull ghcr.io/slmingol/crossword-catastrophe-backend:latest
-docker pull ghcr.io/slmingol/crossword-catastrophe-frontend:latest
-docker pull ghcr.io/slmingol/crossword-catastrophe-scraper:latest
+docker-compose -f docker-compose.prod.yml up -d      # Start
+docker-compose -f docker-compose.prod.yml down       # Stop
+docker-compose -f docker-compose.prod.yml restart    # Restart
+docker-compose -f docker-compose.prod.yml logs -f    # View logs
+docker-compose -f docker-compose.prod.yml ps         # Status
+docker-compose -f docker-compose.prod.yml pull && \
+  docker-compose -f docker-compose.prod.yml up -d    # Update
 ```
 
-Or update your `docker-compose.yml` to use the pre-built images instead of building locally.
+## � Development
 
-## 💻 Development
+For active development, you can run services individually without Docker:
 
 ```bash
 # Install dependencies
