@@ -27,25 +27,14 @@ app.get('/health', (req, res) => {
 // Version endpoint
 app.get('/api/version', (req, res) => {
   try {
-    const rootPackageJson = JSON.parse(
-      fs.readFileSync(path.join(__dirname, '../../../package.json'), 'utf-8')
-    );
     const backendPackageJson = JSON.parse(
       fs.readFileSync(path.join(__dirname, '../package.json'), 'utf-8')
     );
-    const frontendPackageJson = JSON.parse(
-      fs.readFileSync(path.join(__dirname, '../../frontend/package.json'), 'utf-8')
-    );
-    const scraperPackageJson = JSON.parse(
-      fs.readFileSync(path.join(__dirname, '../../scraper/package.json'), 'utf-8')
-    );
 
     res.json({
-      version: rootPackageJson.version,
+      version: backendPackageJson.version,
       components: {
         backend: backendPackageJson.version,
-        frontend: frontendPackageJson.version,
-        scraper: scraperPackageJson.version,
       },
       buildDate: new Date().toISOString(),
     });
