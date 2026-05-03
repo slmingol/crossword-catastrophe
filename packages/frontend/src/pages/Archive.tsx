@@ -156,6 +156,26 @@ export default function Archive() {
         <span style={{ fontWeight: '600', color: colors.filterText, marginRight: '0.5rem' }}>Filter:</span>
         <button
           onClick={() => {
+            const allSources = new Set(Object.keys(SOURCE_CONFIG));
+            setSelectedSources(allSources);
+            localStorage.setItem('selectedSources', JSON.stringify(Array.from(allSources)));
+            setPage(1);
+          }}
+          style={{
+            padding: '0.3rem 0.6rem',
+            border: `1px solid ${colors.clearButtonBorder}`,
+            borderRadius: '4px',
+            backgroundColor: colors.clearButton,
+            cursor: 'pointer',
+            fontSize: '0.7rem',
+            color: colors.filterText,
+            transition: 'all 0.15s'
+          }}
+        >
+          Select All
+        </button>
+        <button
+          onClick={() => {
             setSelectedSources(new Set());
             localStorage.setItem('selectedSources', JSON.stringify([]));
             setPage(1);
