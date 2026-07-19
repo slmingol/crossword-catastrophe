@@ -77,6 +77,7 @@ jobs:
     steps:
       - name: Cleanup old Docker images (${{ matrix.service }})
         uses: actions/delete-package-versions@v5
+        continue-on-error: true
         with:
           package-name: '${{ github.repository }}-${{ matrix.service }}'
           package-type: 'container'
