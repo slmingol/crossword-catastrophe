@@ -4,46 +4,38 @@
 
 set -e
 
-echo "🧩 Starting Crossword App in development mode..."
+echo "Starting Crossword App in development mode..."
 
-# Check if .env files exist
+# Create backend .env if missing
 if [ ! -f packages/backend/.env ]; then
-    echo "Creating backend .env..."
-    cp packages/backend/.env.example packages/backend/.env
+    echo "Creating packages/backend/.env..."
+    cat > packages/backend/.env << 'EOF'
+PORT=3001
+DATABASE_PATH=./data/crossword.db
+EOF
 fi
 
+# Create scraper .env if missing
 if [ ! -f packages/scraper/.env ]; then
-    echo "Creating scraper .env..."
-    cp packages/scraper/.env.example packages/scraper/.env
-fi
-
-if [ ! -f packages/frontend/.env ]; then
-    echo "Creating frontend .env..."
-    cp packages/frontend/.env.example packages/frontend/.env
+    echo "Creating packages/scraper/.env..."
+    cat > packages/scraper/.env << 'EOF'
+DATABASE_PATH=./data/crossword.db
+SCRAPE_SCHEDULE=0 6 * * *
+EOF
 fi
 
 # Install dependencies if needed
 if [ ! -d node_modules ]; then
-    echo "📦 Installing dependencies..."
+    echo "Installing dependencies..."
     npm install
 fi
 
-# Start PostgreSQL with Docker
-echo "🐳 Starting PostgreSQL..."
-docker-compose up -d postgres
+# Ensure data directory exists (SQLite lives here)
+mkdir -p data
 
-# Wait for PostgreSQL
-sleep 3
-
-# Run migrations
-echo "🔧 Running migrations..."
-cd packages/backend && npm run migrate && cd ../..
-
-echo ""
-echo "✅ PostgreSQL is ready!"
 echo ""
 echo "Start the services in separate terminals:"
 echo "  Terminal 1: npm run dev:backend"
 echo "  Terminal 2: npm run dev:frontend"
-echo "  Terminal 3: npm run dev:scraper"
+echo "  Terminal 3: npm run dev:scraper (optional)"
 echo ""
