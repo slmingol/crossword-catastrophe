@@ -235,7 +235,7 @@ function SimpleCrossword({ puzzle, showSolution, userGrid, setUserGrid, theme }:
                 )}
                 {cell !== '.' && (
                   <input
-                    ref={(el) => cellRefs.current[`${rowIdx}-${colIdx}`] = el}
+                    ref={(el) => { cellRefs.current[`${rowIdx}-${colIdx}`] = el; }}
                     type="text"
                     maxLength={1}
                     value={displayValue}

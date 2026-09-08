@@ -295,10 +295,10 @@ export default function Archive() {
                     fontSize: '0.9rem',
                     transition: 'background-color 0.15s'
                   }}
-                  onMouseOver={(e) => {
+                  onMouseOver={(e: React.MouseEvent<HTMLAnchorElement>) => {
                     e.currentTarget.style.backgroundColor = colors.cardHover;
                   }}
-                  onMouseOut={(e) => {
+                  onMouseOut={(e: React.MouseEvent<HTMLAnchorElement>) => {
                     e.currentTarget.style.backgroundColor = colors.cardBg;
                   }}
                 >
