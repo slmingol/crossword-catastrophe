@@ -1,54 +1,52 @@
 #!/bin/bash
 
-# Crossword App Setup Script
+# Setup script for Crossword App — Docker-based full stack
 
 set -e
 
-echo "🧩 Setting up Crossword App..."
+echo "Setting up Crossword App..."
 
-# Check if Docker is running
-if ! docker info > /dev/null 2>&1; then
-    echo "❌ Error: Docker is not running. Please start Docker and try again."
+# Check Docker is available
+if ! docker-compose version > /dev/null 2>&1; then
+    echo "Error: docker-compose not found. Install Docker Desktop or Podman with docker-compose."
     exit 1
 fi
 
-# Create .env files from examples
-echo "📝 Creating .env files..."
-cp packages/backend/.env.example packages/backend/.env 2>/dev/null || true
-cp packages/scraper/.env.example packages/scraper/.env 2>/dev/null || true
-cp packages/frontend/.env.example packages/frontend/.env 2>/dev/null || true
+# Create backend .env if missing
+if [ ! -f packages/backend/.env ]; then
+    echo "Creating packages/backend/.env..."
+    cat > packages/backend/.env << 'EOF'
+PORT=3001
+DATABASE_PATH=/app/data/crossword.db
+EOF
+fi
 
-# Install dependencies
-echo "📦 Installing dependencies..."
+# Create scraper .env if missing
+if [ ! -f packages/scraper/.env ]; then
+    echo "Creating packages/scraper/.env..."
+    cat > packages/scraper/.env << 'EOF'
+DATABASE_PATH=/app/data/crossword.db
+SCRAPE_SCHEDULE=0 6 * * *
+EOF
+fi
+
+# Install Node dependencies
+echo "Installing dependencies..."
 npm install
 
-# Start Docker services
-echo "🐳 Starting Docker services..."
-docker-compose up -d postgres
-
-# Wait for PostgreSQL to be ready
-echo "⏳ Waiting for PostgreSQL to be ready..."
-sleep 5
-
-# Run database migrations
-echo "🔧 Running database migrations..."
-docker-compose up -d backend
-sleep 3
-docker-compose exec -T backend npm run migrate --workspace=backend || true
-
-# Start all services
-echo "🚀 Starting all services..."
-docker-compose up -d
+# Build and start all services
+echo "Starting Docker services..."
+docker-compose up -d --build
 
 echo ""
-echo "✅ Setup complete!"
+echo "Setup complete!"
 echo ""
 echo "Services:"
 echo "  Frontend: http://localhost:3000"
 echo "  Backend:  http://localhost:3001"
 echo ""
-echo "To view logs: docker-compose logs -f"
-echo "To stop:      docker-compose down"
+echo "Logs:  docker-compose logs -f"
+echo "Stop:  docker-compose down"
 echo ""
-echo "The scraper will run daily at 6 AM to fetch new puzzles."
-echo "To manually trigger a scrape: docker-compose exec scraper npm run scrape --workspace=scraper"
+echo "The scraper runs daily at 6 AM to fetch new puzzles."
+echo "Manual scrape: docker-compose exec scraper node dist/index.js"

@@ -1,53 +1,43 @@
 #!/bin/bash
 
-# Quick test script to verify the application is working
+# Quick smoke test — verifies the running stack responds correctly
 
 set -e
 
-echo "🧪 Testing Crossword App..."
+echo "Testing Crossword App..."
 
-# Check if services are running
-echo "Checking services..."
-
-# Test PostgreSQL
-if docker-compose exec -T postgres pg_isready -U crossword > /dev/null 2>&1; then
-    echo "✅ PostgreSQL is running"
+# Backend health
+if curl -sf http://localhost:3001/health > /dev/null; then
+    echo "Backend health: OK"
 else
-    echo "❌ PostgreSQL is not responding"
+    echo "Backend health: FAILED (is docker-compose up?)"
     exit 1
 fi
 
-# Test backend
-if curl -s http://localhost:3001/health > /dev/null; then
-    echo "✅ Backend is running"
+# Backend version
+VERSION=$(curl -sf http://localhost:3001/api/version | python3 -c "import sys,json; print(json.load(sys.stdin)['version'])" 2>/dev/null || echo "unknown")
+echo "Backend version: $VERSION"
+
+# Puzzles API
+PUZZLE_COUNT=$(curl -sf http://localhost:3001/api/puzzles | python3 -c "import sys,json; print(json.load(sys.stdin)['pagination']['total'])" 2>/dev/null || echo "0")
+echo "Puzzles in database: $PUZZLE_COUNT"
+
+# Frontend static
+if curl -sf http://localhost:3000 > /dev/null; then
+    echo "Frontend: OK"
 else
-    echo "❌ Backend is not responding"
+    echo "Frontend: FAILED (is docker-compose up?)"
     exit 1
 fi
 
-# Test frontend
-if curl -s http://localhost:3000 > /dev/null; then
-    echo "✅ Frontend is running"
+# nginx API proxy
+if curl -sf http://localhost:3000/api/puzzles > /dev/null; then
+    echo "nginx -> backend proxy: OK"
 else
-    echo "❌ Frontend is not responding"
+    echo "nginx -> backend proxy: FAILED"
     exit 1
 fi
-
-# Check database tables
-echo "Checking database..."
-TABLES=$(docker-compose exec -T postgres psql -U crossword -d crossword -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';")
-if [ "$TABLES" -ge 2 ]; then
-    echo "✅ Database tables created"
-else
-    echo "❌ Database tables missing"
-    exit 1
-fi
-
-# Check puzzle count
-PUZZLE_COUNT=$(docker-compose exec -T postgres psql -U crossword -d crossword -t -c "SELECT COUNT(*) FROM puzzles;")
-echo "📊 Puzzles in database: $(echo $PUZZLE_COUNT | xargs)"
 
 echo ""
-echo "✅ All tests passed!"
-echo ""
-echo "Try the app at: http://localhost:3000"
+echo "All checks passed!"
+echo "Open http://localhost:3000"

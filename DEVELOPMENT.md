@@ -3,12 +3,12 @@
 ## Project Structure
 
 ```
-crossword-app/
+crossword-catastrophe/
 ├── packages/
 │   ├── backend/          # Express API server
 │   │   ├── src/
 │   │   │   ├── index.ts       # Server entry point
-│   │   │   ├── db/            # Database client and migrations
+│   │   │   ├── db/            # SQLite client and migrations
 │   │   │   └── routes/        # API routes
 │   │   └── Dockerfile
 │   ├── frontend/         # React + Vite app
@@ -23,6 +23,7 @@ crossword-app/
 │       │   ├── scrape.ts      # Scraping logic
 │       │   └── parser.ts      # .puz file parser
 │       └── Dockerfile
+├── xword-dl/             # Vendored xword-dl fork (Seattle Times Midi support)
 ├── docker-compose.yml
 └── package.json
 ```
@@ -30,130 +31,133 @@ crossword-app/
 ## Architecture
 
 ### Backend
-- **Framework**: Express + TypeScript
-- **Database**: PostgreSQL with pg driver
+- **Framework**: Express 5 + TypeScript 6
+- **Database**: SQLite via better-sqlite3
 - **API Endpoints**:
-  - `GET /api/puzzles` - List puzzles with pagination
-  - `GET /api/puzzles/:id` - Get puzzle details
-  - `GET /api/puzzles/daily/today` - Get today's puzzle
-  - `POST /api/puzzles/:id/progress` - Save user progress
+  - `GET /api/puzzles` — List puzzles with pagination
+  - `GET /api/puzzles/:id` — Get puzzle details
+  - `GET /api/puzzles/daily/today` — Get today's puzzle
+  - `POST /api/puzzles/:id/progress` — Save user progress
+  - `GET /api/puzzles/:id/progress/:userId` — Get user progress
+  - `GET /api/puzzles/:id/previous` / `/next` — Navigate puzzles
 
 ### Frontend
-- **Framework**: React 18 + Vite
+- **Framework**: React 19 + Vite 8
 - **Crossword Component**: @guardian/react-crossword
-- **Routing**: React Router v6
+- **Routing**: React Router v7
 - **Pages**:
-  - Home - Shows today's puzzle
-  - Archive - Browse all puzzles
-  - PuzzlePlay - Play a specific puzzle
+  - Home — Today's puzzle
+  - Archive — Browse all puzzles
+  - PuzzlePlay — Play a specific puzzle
 
 ### Scraper
-- **Tool**: xword-dl (Python CLI)
-- **Schedule**: Daily at 6 AM (configurable)
-- **Sources**: WSJ, USA Today, Universal Crossword
-- **Format**: Parses .puz (Across Lite) files
+- **Tool**: xword-dl (Python CLI, vendored fork at `xword-dl/`)
+- **Schedule**: Daily at 6 AM (configurable via `SCRAPE_SCHEDULE`)
+- **Sources**: USA Today, Universal Crossword, LA Times, Newsday, Seattle Times Midi
+- **Format**: Parses .puz (Across Lite) files into SQLite
 
 ## Development
 
 ### Prerequisites
-- Node.js 20+
-- Docker & Docker Compose
-- (Optional) Python 3.11+ with xword-dl for local testing
+- Node.js 25+
+- Docker & Docker Compose (or Podman + docker-compose)
+- Python 3.14+ with xword-dl for local scraper testing (optional)
 
-### Quick Start
+### Quick Start (Docker)
 
 ```bash
-# Clone/download the project
-cd crossword-app
-
-# Run setup script (installs deps, starts Docker, runs migrations)
 chmod +x setup.sh
 ./setup.sh
-
-# Access the app
 open http://localhost:3000
 ```
 
-### Development Mode (without full Docker)
+### Development Mode (local, no Docker)
 
 ```bash
-# Start PostgreSQL only
-docker-compose up -d postgres
+# One-time setup
+chmod +x dev.sh
+./dev.sh
 
-# In separate terminals:
-npm run dev:backend    # Terminal 1
-npm run dev:frontend   # Terminal 2
+# Then in separate terminals:
+npm run dev:backend    # Terminal 1 — http://localhost:3001
+npm run dev:frontend   # Terminal 2 — http://localhost:3000
 npm run dev:scraper    # Terminal 3 (optional)
 ```
 
 ## Database Schema
 
 ### puzzles
-- `id` - Primary key
-- `title` - Puzzle title
-- `author` - Puzzle creator
-- `source` - Publication source
-- `date` - Publication date (unique per source)
-- `difficulty` - Optional difficulty level
-- `grid_data` - JSON: grid dimensions and cell data
-- `clues_across` - JSON: across clues with answers
-- `clues_down` - JSON: down clues with answers
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | INTEGER PK | Auto-increment |
+| `title` | VARCHAR(255) | Puzzle title |
+| `author` | VARCHAR(255) | Puzzle creator |
+| `source` | VARCHAR(100) | Publication name |
+| `date` | DATE | Publication date (unique per source) |
+| `difficulty` | VARCHAR(50) | Optional |
+| `grid_data` | TEXT | JSON: grid dimensions and cell data |
+| `clues_across` | TEXT | JSON: across clues |
+| `clues_down` | TEXT | JSON: down clues |
 
 ### user_progress
-- `id` - Primary key
-- `puzzle_id` - Foreign key to puzzles
-- `user_id` - User identifier (default: anonymous)
-- `progress_data` - JSON: current puzzle state
-- `completed` - Boolean completion flag
-- `time_spent` - Seconds spent on puzzle
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | INTEGER PK | Auto-increment |
+| `puzzle_id` | INTEGER FK | References puzzles |
+| `user_id` | VARCHAR(100) | Default: "anonymous" |
+| `progress_data` | TEXT | JSON: current puzzle state |
+| `completed` | BOOLEAN | |
+| `time_spent` | INTEGER | Seconds |
 
 ## Configuration
 
 ### Environment Variables
 
-**Backend** (`.env`):
+**Backend** (`packages/backend/.env`):
 ```env
-DATABASE_URL=postgresql://crossword:crossword_dev@localhost:5432/crossword
 PORT=3001
+DATABASE_PATH=./data/crossword.db
 ```
 
-**Scraper** (`.env`):
+**Scraper** (`packages/scraper/.env`):
 ```env
-DATABASE_URL=postgresql://crossword:crossword_dev@localhost:5432/crossword
-SCRAPE_SCHEDULE=0 6 * * *  # Cron format
+DATABASE_PATH=./data/crossword.db
+SCRAPE_SCHEDULE=0 6 * * *
 ```
 
-**Frontend** (`.env`):
-```env
-VITE_API_URL=http://localhost:3001/api
-```
+## Adding Puzzle Sources
 
-## Adding More Puzzle Sources
-
-Edit `packages/scraper/src/scrape.ts` and add to the `PUZZLE_SOURCES` array:
+Edit `packages/scraper/src/scrape.ts` and add to `PUZZLE_SOURCES`:
 
 ```typescript
 const PUZZLE_SOURCES = [
-  { name: 'wsj', display: 'Wall Street Journal' },
-  { name: 'usa-today', display: 'USA Today' },
-  { name: 'universal', display: 'Universal Crossword' },
+  { name: 'usa', display: 'USA Today' },
+  { name: 'uni', display: 'Universal Crossword' },
+  { name: 'lat', display: 'Los Angeles Times' },
+  { name: 'nd',  display: 'Newsday' },
+  { name: 'stm', display: 'Seattle Times Midi' },
   { name: 'your-source', display: 'Your Source Name' },
 ];
 ```
 
-Check xword-dl documentation for available sources: `xword-dl --help`
+Check available sources: `xword-dl --help`
 
 ## Manual Scraping
 
-Trigger a scrape manually:
-
 ```bash
 # Inside Docker
-docker-compose exec scraper npm run scrape --workspace=scraper
+docker-compose exec scraper node dist/index.js
 
-# Or locally
-cd packages/scraper
-npm run scrape
+# Locally
+cd packages/scraper && npm run scrape
+```
+
+## Smoke Testing
+
+```bash
+# With stack running via docker-compose
+chmod +x test.sh
+./test.sh
 ```
 
 ## Troubleshooting
@@ -161,27 +165,25 @@ npm run scrape
 ### No puzzles showing up
 - Check scraper logs: `docker-compose logs scraper`
 - Verify xword-dl is installed: `docker-compose exec scraper xword-dl --version`
-- Some sources may require subscriptions
+- Some sources may be unavailable on certain dates
 
-### Frontend can't connect to backend
-- Check CORS settings in `packages/backend/src/index.ts`
-- Verify proxy configuration in `packages/frontend/vite.config.ts`
-- Ensure backend is running: `curl http://localhost:3001/health`
+### Frontend can't reach backend
+- Check nginx proxy config: `packages/frontend/nginx.conf`
+- Verify backend is running: `curl http://localhost:3001/health`
+- In dev mode, the Vite proxy in `vite.config.ts` forwards `/api` to `localhost:3001`
 
-### Database connection errors
-- Confirm PostgreSQL is running: `docker-compose ps postgres`
-- Check DATABASE_URL in .env files
-- Verify migrations ran: `docker-compose logs backend | grep migration`
+### SQLite database issues
+- Database file lives at the path set in `DATABASE_PATH`
+- Docker volume: `puzzle_data` (see `docker-compose.yml`)
+- Tables are created automatically on backend startup
 
 ## Production Deployment
 
-1. Update environment variables for production
-2. Change PostgreSQL credentials
-3. Set `NODE_ENV=production`
-4. Use proper secrets management
-5. Consider adding authentication
-6. Set up SSL/TLS for frontend
-7. Configure proper CORS origins
+1. Use `docker-compose.prod.yml` with pre-built GHCR images
+2. Set `NODE_ENV=production`
+3. Mount a persistent volume for the SQLite database
+4. Configure proper CORS origins in `packages/backend/src/index.ts`
+5. Set up SSL/TLS termination in front of nginx
 
 ## Future Enhancements
 
@@ -189,7 +191,6 @@ npm run scrape
 - Social features (leaderboards, sharing)
 - Mobile app (React Native)
 - Puzzle difficulty ratings
-- Hints and reveal letter features
+- Hints and reveal features
 - Collaborative solving
-- Custom puzzle uploads
 - Statistics and analytics
