@@ -10,19 +10,34 @@
       "groupSlug": "all-minor-patch"
     },
     {
+      "groupName": "all major dependencies",
+      "matchUpdateTypes": ["major"],
+      "groupSlug": "all-major"
+    },
+    {
       "groupName": "React ecosystem",
       "matchPackagePatterns": ["^react", "^@types/react"],
-      "matchUpdateTypes": ["minor", "patch"]
+      "matchUpdateTypes": ["minor", "patch", "major"]
     },
     {
       "groupName": "TypeScript and types",
       "matchPackagePatterns": ["^@types/", "^typescript$"],
-      "matchUpdateTypes": ["minor", "patch"]
+      "matchUpdateTypes": ["minor", "patch", "major"]
+    },
+    {
+      "groupName": "Vite ecosystem",
+      "matchPackagePatterns": ["^vite", "^@vitejs/"],
+      "matchUpdateTypes": ["minor", "patch", "major"]
     },
     {
       "groupName": "Docker base images",
       "matchDatasources": ["docker"],
-      "matchUpdateTypes": ["minor", "patch"]
+      "matchUpdateTypes": ["minor", "patch", "major"]
+    },
+    {
+      "groupName": "GitHub Actions",
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["minor", "patch", "major"]
     }
   ],
   "ignoreDeps": [],
