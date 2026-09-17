@@ -43,7 +43,7 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Bump version
+      - name: Bump version and trigger build
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -58,3 +58,10 @@ jobs:
           git add package.json packages/frontend/package.json
           git commit -m "chore: bump version to ${NEW_VERSION}"
           git push
+
+      # GITHUB_TOKEN pushes don't trigger workflows; dispatch the build explicitly
+      - name: Trigger build-and-push
+        run: |
+          gh workflow run build-and-push.yml --ref main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
