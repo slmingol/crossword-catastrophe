@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y curl && \
 
 # Install vendored xword-dl fork (includes SSL fix for USA Today + Seattle Times Midi support)
 COPY xword-dl /tmp/xword-dl
-RUN pip install --no-cache-dir /tmp/xword-dl && rm -rf /tmp/xword-dl
+RUN SETUPTOOLS_SCM_PRETEND_VERSION=2025.10.14.post1 pip install --no-cache-dir /tmp/xword-dl && rm -rf /tmp/xword-dl
 
 WORKDIR /app
 
