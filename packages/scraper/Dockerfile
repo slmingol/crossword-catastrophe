@@ -1,15 +1,13 @@
 FROM python:3.14-slim
 
-# Install Node.js and git
-RUN apt-get update && apt-get install -y curl git && \
+# Install Node.js
+RUN apt-get update && apt-get install -y curl && \
     curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
 
-# Fetch xword-dl fork with Seattle Times Midi support
-RUN git clone --branch feature/seattle-times-midi --depth 1 https://github.com/slmingol/xword-dl /tmp/xword-dl
-
-# Install xword-dl from local copy (faster rebuilds than GitHub fetch)
+# Install vendored xword-dl fork (includes SSL fix for USA Today + Seattle Times Midi support)
+COPY xword-dl /tmp/xword-dl
 RUN pip install --no-cache-dir /tmp/xword-dl && rm -rf /tmp/xword-dl
 
 WORKDIR /app

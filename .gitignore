@@ -20,4 +20,4 @@ data/*
 coverage/
 .vscode/
 .idea/
-xword-dl/
+# xword-dl vendored fork is tracked (its own .gitignore excludes .venv, __pycache__, etc.)

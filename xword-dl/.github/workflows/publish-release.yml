@@ -1,0 +1,34 @@
+name: Publish release and tag repo
+
+on:
+  push:
+    tags:
+      - 'v20*'
+
+jobs:
+  build-and-publish-release:
+    runs-on: ubuntu-latest
+    environment: publish
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+      - name: Canonicalize version number
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          echo Version: $VERSION
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+      - name: Draft release notes
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          name: ${{ steps.get_version.outputs.VERSION }}
+      - name: Build package
+        run: uv build
+      - name: Publish package
+        run: uv publish --trusted-publishing always
