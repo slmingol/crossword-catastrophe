@@ -43,7 +43,7 @@ case "$CMD" in
   update)
     echo "🔄 Updating to latest version..."
     docker compose -f docker-compose.prod.yml pull
-    docker compose -f docker-compose.prod.yml up -d
+    docker compose -f docker-compose.prod.yml up -d --pull always
     echo "✅ Updated and restarted!"
     ;;
     
