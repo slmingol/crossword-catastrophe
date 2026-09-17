@@ -57,8 +57,10 @@ jobs:
           npm version ${{ steps.type.outputs.type }} --no-git-tag-version
           NEW_VERSION=$(node -p "require('./package.json').version")
           npm version "${NEW_VERSION}" --workspace=packages/frontend --no-git-tag-version
+          npm version "${NEW_VERSION}" --workspace=packages/backend --no-git-tag-version
+          npm version "${NEW_VERSION}" --workspace=packages/scraper --no-git-tag-version
 
-          git add package.json packages/frontend/package.json
+          git add package.json packages/frontend/package.json packages/backend/package.json packages/scraper/package.json
           git commit -m "chore: bump version to ${NEW_VERSION}"
           git push
 
