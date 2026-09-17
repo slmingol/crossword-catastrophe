@@ -10,6 +10,9 @@ const packageJson = JSON.parse(
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    dedupe: ['react', 'react-dom'],
+  },
   define: {
     __APP_VERSION__: JSON.stringify(packageJson.version),
   },
