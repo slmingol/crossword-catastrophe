@@ -14,9 +14,9 @@ jobs:
       contents: write
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v10.1.0
       - name: Canonicalize version number
         id: get_version
         run: |
@@ -24,7 +24,7 @@ jobs:
           echo Version: $VERSION
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
       - name: Draft release notes
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           draft: true
           name: ${{ steps.get_version.outputs.VERSION }}
