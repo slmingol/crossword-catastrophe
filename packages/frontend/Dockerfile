@@ -11,7 +11,7 @@ COPY packages/frontend/tsconfig*.json ./packages/frontend/
 COPY packages/frontend/vite.config.ts ./packages/frontend/
 
 # Install dependencies
-RUN npm install --workspace=frontend
+RUN npm install --workspace=frontend --legacy-peer-deps
 
 # Copy frontend source
 COPY packages/frontend/index.html ./packages/frontend/
