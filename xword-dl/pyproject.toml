@@ -17,7 +17,7 @@ dependencies = [
     "pyyaml==6.0.3",
     "requests==2.34.2",
     "unidecode==1.4.0",
-    "xmltodict==0.15.1",
+    "xmltodict==1.0.4",
 ]
 
 [project.scripts]

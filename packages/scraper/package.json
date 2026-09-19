@@ -11,8 +11,8 @@
     "historical": "tsx src/historical.ts"
   },
   "dependencies": {
-    "better-sqlite3": "^12.9.0",
-    "dotenv": "^17.4.2",
+    "better-sqlite3": "^13.0.0",
+    "dotenv": "^18.0.0",
     "node-cron": "^4.2.1",
     "zod": "^4.4.1"
   },
