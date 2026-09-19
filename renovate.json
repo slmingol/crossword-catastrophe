@@ -6,42 +6,93 @@
   "packageRules": [
     {
       "groupName": "all non-major dependencies",
-      "matchUpdateTypes": ["minor", "patch"],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
       "groupSlug": "all-minor-patch"
     },
     {
       "groupName": "all major dependencies",
-      "matchUpdateTypes": ["major"],
+      "matchUpdateTypes": [
+        "major"
+      ],
       "groupSlug": "all-major"
     },
     {
       "groupName": "React ecosystem",
-      "matchPackagePatterns": ["^react", "^@types/react"],
-      "matchUpdateTypes": ["minor", "patch", "major"]
+      "matchPackagePatterns": [
+        "^react",
+        "^@types/react"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "major"
+      ]
     },
     {
       "groupName": "TypeScript and types",
-      "matchPackagePatterns": ["^@types/", "^typescript$"],
-      "matchUpdateTypes": ["minor", "patch", "major"]
+      "matchPackagePatterns": [
+        "^@types/",
+        "^typescript$"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "major"
+      ]
     },
     {
       "groupName": "Vite ecosystem",
-      "matchPackagePatterns": ["^vite", "^@vitejs/"],
-      "matchUpdateTypes": ["minor", "patch", "major"]
+      "matchPackagePatterns": [
+        "^vite",
+        "^@vitejs/"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "major"
+      ]
     },
     {
       "groupName": "Docker base images",
-      "matchDatasources": ["docker"],
-      "matchUpdateTypes": ["minor", "patch", "major"]
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "major"
+      ]
     },
     {
       "groupName": "GitHub Actions",
-      "matchManagers": ["github-actions"],
-      "matchUpdateTypes": ["minor", "patch", "major"]
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "major"
+      ]
+    },
+    {
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "automerge": true
     }
   ],
   "ignoreDeps": [],
-  "labels": ["dependencies"],
-  "assignees": ["slmingol"],
-  "reviewers": ["slmingol"]
+  "labels": [
+    "dependencies"
+  ],
+  "assignees": [
+    "slmingol"
+  ],
+  "reviewers": [
+    "slmingol"
+  ]
 }
