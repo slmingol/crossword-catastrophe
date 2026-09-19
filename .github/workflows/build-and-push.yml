@@ -60,7 +60,7 @@ jobs:
           npm version "${NEW_VERSION}" --workspace=packages/backend --no-git-tag-version
           npm version "${NEW_VERSION}" --workspace=packages/scraper --no-git-tag-version
 
-          git add package.json packages/frontend/package.json packages/backend/package.json packages/scraper/package.json
+          git add package.json package-lock.json packages/frontend/package.json packages/backend/package.json packages/scraper/package.json
           git commit -m "chore: bump version to ${NEW_VERSION}"
           git pull --rebase origin main
           git push
