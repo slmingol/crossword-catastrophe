@@ -62,6 +62,7 @@ jobs:
 
           git add package.json packages/frontend/package.json packages/backend/package.json packages/scraper/package.json
           git commit -m "chore: bump version to ${NEW_VERSION}"
+          git pull --rebase origin main
           git push
 
           echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
