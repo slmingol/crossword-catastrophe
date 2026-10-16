@@ -86,6 +86,9 @@
     }
   ],
   "ignoreDeps": [],
+  "ignorePaths": [
+    "xword-dl/**"
+  ],
   "labels": [
     "dependencies"
   ],
